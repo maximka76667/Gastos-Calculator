@@ -4,13 +4,13 @@ import Cookies from "js-cookie";
 
 interface Person {
   name: string;
-  days: number;
+  days: number | "";
   gastos: number;
 }
 
 function App() {
-  const [total, setTotal] = useState<number>(0);
-  const [daysTotal, setDaysTotal] = useState<number>(0);
+  const [total, setTotal] = useState<number | "">(0);
+  const [daysTotal, setDaysTotal] = useState<number | "">(0);
 
   const [persons, setPersons] = useState<Person[]>([]);
 
@@ -20,7 +20,7 @@ function App() {
     setPersons((prev) =>
       prev.map((person) => ({
         ...person,
-        gastos: (person.days / daysTotal) * total,
+        gastos: ((person.days || 0) / (daysTotal || 0)) * (total || 0),
       }))
     );
   }, [total, daysTotal]);
@@ -42,7 +42,9 @@ function App() {
 
   useEffect(() => {
     if (isInitialized) {
-      setDaysTotal(persons.reduce((prev, person) => prev + person.days, 0));
+      setDaysTotal(
+        persons.reduce((prev, person) => prev + (person.days || 0), 0)
+      );
       Cookies.set("persons", JSON.stringify(persons), {
         path: "/Gastos-Calculator",
       });
@@ -69,7 +71,7 @@ function App() {
           placeholder="Total"
           value={total}
           onChange={(e) => {
-            setTotal(parseFloat(e.target.value) || (0 as number));
+            setTotal(parseFloat(e.target.value) || "");
           }}
         />
         <div className={styles["persons__list"]}>
@@ -118,8 +120,7 @@ function App() {
                             i === index
                               ? {
                                   ...person,
-                                  days:
-                                    parseInt(e.target.value) || (0 as number),
+                                  days: parseFloat(e.target.value) || "",
                                 }
                               : person
                           )
