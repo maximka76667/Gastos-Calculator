@@ -38,6 +38,20 @@
   flex-direction: column;
   margin: 30px 40px;
   border: 1px solid #222;
+  position: relative;
+}
+
+.person__remove {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  font-size: 25px;
+  cursor: pointer;
+  transition: all 0.1s;
+}
+
+.person__remove:hover {
+  color: #ccc;
 }
 
 .person__info {

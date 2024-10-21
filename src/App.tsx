@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styles from "./App.module.css";
+import Cookies from "js-cookie";
 
 interface Person {
   name: string;
@@ -11,12 +12,9 @@ function App() {
   const [total, setTotal] = useState<number>(0);
   const [daysTotal, setDaysTotal] = useState<number>(0);
 
-  const [persons, setPersons] = useState<Person[]>([
-    { name: "Max", days: 30, gastos: 0 },
-    { name: "Olesia", days: 30, gastos: 0 },
-    { name: "Angels", days: 30, gastos: 0 },
-    { name: "Mariola", days: 30, gastos: 0 },
-  ]);
+  const [persons, setPersons] = useState<Person[]>([]);
+
+  const [isInitialized, setIsInitialized] = useState(false); // New flag
 
   useEffect(() => {
     setPersons((prev) =>
@@ -28,8 +26,25 @@ function App() {
   }, [total, daysTotal]);
 
   useEffect(() => {
-    setDaysTotal(persons.reduce((prev, person) => prev + person.days, 0));
-  }, [persons]);
+    const cookiesPersons = Cookies.get("persons");
+
+    console.log(cookiesPersons);
+
+    if (cookiesPersons) {
+      setPersons(JSON.parse(cookiesPersons));
+    }
+    setIsInitialized(true);
+  }, []);
+
+  useEffect(() => {
+    if (isInitialized) {
+      setDaysTotal(persons.reduce((prev, person) => prev + person.days, 0));
+      Cookies.set("persons", JSON.stringify(persons), {
+        path: "/Gastos-Calculator",
+      });
+      console.log(JSON.stringify(persons));
+    }
+  }, [persons, isInitialized]);
 
   return (
     <div className={styles.app}>
@@ -47,7 +62,15 @@ function App() {
         <div className={styles["persons__list"]}>
           {persons.map(({ name, days, gastos }, index) => {
             return (
-              <div className={styles["person"]}>
+              <div key={index} className={styles["person"]}>
+                <div
+                  className={styles["person__remove"]}
+                  onClick={() => {
+                    setPersons((prev) => prev.filter((_, i) => i !== index));
+                  }}
+                >
+                  X
+                </div>
                 <div className={styles["person__name"]}>
                   <input
                     className={styles["person__name-input"]}
