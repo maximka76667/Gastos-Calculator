@@ -27,12 +27,16 @@ function App() {
 
   useEffect(() => {
     const cookiesPersons = Cookies.get("persons");
-
-    console.log(cookiesPersons);
-
     if (cookiesPersons) {
       setPersons(JSON.parse(cookiesPersons));
     }
+
+    const cookiesTotal = Cookies.get("total");
+    console.log(cookiesTotal);
+    if (cookiesTotal) {
+      setTotal(JSON.parse(cookiesTotal));
+    }
+
     setIsInitialized(true);
   }, []);
 
@@ -42,9 +46,17 @@ function App() {
       Cookies.set("persons", JSON.stringify(persons), {
         path: "/Gastos-Calculator",
       });
-      console.log(JSON.stringify(persons));
     }
   }, [persons, isInitialized]);
+
+  useEffect(() => {
+    if (isInitialized) {
+      console.log(JSON.stringify(total));
+      Cookies.set("total", JSON.stringify(total), {
+        path: "/Gastos-Calculator",
+      });
+    }
+  }, [total, isInitialized]);
 
   return (
     <div className={styles.app}>
@@ -55,9 +67,10 @@ function App() {
           name="total"
           id="total"
           placeholder="Total"
-          onChange={(e) =>
-            setTotal(parseFloat(e.target.value) || (0 as number))
-          }
+          value={total}
+          onChange={(e) => {
+            setTotal(parseFloat(e.target.value) || (0 as number));
+          }}
         />
         <div className={styles["persons__list"]}>
           {persons.map(({ name, days, gastos }, index) => {
