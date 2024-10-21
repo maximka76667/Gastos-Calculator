@@ -90,7 +90,7 @@ function App() {
                   <input
                     className={styles["person__name-input"]}
                     type="text"
-                    placeholder="Insert new person"
+                    placeholder="New person"
                     onChange={(e) => {
                       setPersons((prev) =>
                         prev.map((person, i) =>
