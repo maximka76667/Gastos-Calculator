@@ -22,8 +22,7 @@ function App() {
     const personsExtras = arraySum(person.extras);
 
     // How much this person debts to others
-    const personsDebt =
-      (extraTotal - personsExtras) / Math.max(1, persons.length - 1);
+    const personsDebt = extraTotal / Math.max(1, persons.length);
 
     return gasto + personsDebt - personsExtras;
   }
