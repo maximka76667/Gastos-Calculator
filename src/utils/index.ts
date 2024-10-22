@@ -4,7 +4,7 @@ const arraySum = (array: string[]) =>
     0
   );
 
-const roundUp = (value: number, digitsAfterPoint: number = 2) =>
+const round = (value: number, digitsAfterPoint: number = 2) =>
   value.toFixed(digitsAfterPoint);
 
-export { roundUp, arraySum };
+export { round, arraySum };

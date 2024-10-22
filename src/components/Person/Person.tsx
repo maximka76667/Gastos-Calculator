@@ -1,7 +1,7 @@
 import React, { ChangeEvent, ChangeEventHandler, Dispatch } from "react";
 import { PersonInterface } from "../../types";
 import styles from "./Person.module.css";
-import { roundUp } from "../../utils";
+import { round } from "../../utils";
 
 interface PersonProps {
   id: number;
@@ -97,7 +97,7 @@ const Person = ({ id, person, setPersons }: PersonProps) => {
           <p className={styles["person__days-title"]}>Days</p>
         </div>
         <div className={styles["person__gastos"]}>
-          <p className={styles["person__gastos-value"]}>{roundUp(gastos)}</p>
+          <p className={styles["person__gastos-value"]}>{round(gastos)}</p>
           <p className={styles["person__gastos-title"]}>Gastos</p>
         </div>
       </div>
