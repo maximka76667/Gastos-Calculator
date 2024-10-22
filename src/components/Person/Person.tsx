@@ -1,56 +1,77 @@
-import React, { ChangeEvent, Dispatch, MouseEvent } from "react";
+import React, { ChangeEvent, ChangeEventHandler, Dispatch } from "react";
 import { PersonInterface } from "../../types";
 import styles from "./Person.module.css";
+import { roundUp } from "../../utils";
 
 interface PersonProps {
-  index: number;
+  id: number;
   person: PersonInterface;
   setPersons: Dispatch<React.SetStateAction<PersonInterface[]>>;
 }
 
-const Person = ({ index, person, setPersons }: PersonProps) => {
+const Person = ({ id, person, setPersons }: PersonProps) => {
   const { name, days, gastos, extras } = person;
 
-  function handleExtras(
-    e: ChangeEvent<HTMLInputElement>,
-    indexExtra: number,
-    index: number
-  ) {
+  function changeExtraByIndex(extraIndex: number, newExtraValue: string) {
+    return {
+      ...person,
+      extras: extras.map((extra, i) => {
+        return i === extraIndex ? newExtraValue : extra;
+      }),
+    };
+  }
+
+  function handleExtras(e: ChangeEvent<HTMLInputElement>, indexExtra: number) {
     return setPersons((prev) =>
       prev.map((person, i) => {
-        const { extras } = person;
-
-        return index === i
-          ? {
-              ...person,
-              extras: extras.map((extra, i) => {
-                return i === indexExtra ? e.target.value || "" : extra;
-              }),
-            }
+        return id === i
+          ? changeExtraByIndex(indexExtra, e.target.value || "")
           : person;
       })
     );
   }
 
-  function handleAddExtras(
-    e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>,
-    index: number
-  ) {
+  const handleAddExtras = () => {
     setPersons((prev) =>
       prev.map((person, i) =>
-        i === index ? { ...person, extras: [...person.extras, ""] } : person
+        i === id ? { ...person, extras: [...person.extras, ""] } : person
       )
     );
-  }
+  };
+
+  const handleRemovePerson = () => {
+    setPersons((prev) => prev.filter((_, i) => i !== id));
+  };
+
+  const handleDaysChange: ChangeEventHandler<HTMLInputElement> = (e) => {
+    setPersons((prev) =>
+      prev.map((person, i) =>
+        i === id
+          ? {
+              ...person,
+              days: parseFloat(e.target.value) || "",
+            }
+          : person
+      )
+    );
+  };
+
+  const handleNameChange: ChangeEventHandler<HTMLInputElement> = (e) => {
+    setPersons((prev) =>
+      prev.map((person, i) =>
+        i === id
+          ? {
+              ...person,
+              name: e.target.value,
+            }
+          : person
+      )
+    );
+  };
 
   return (
-    <div key={index} className={styles["person"]}>
-      <div
-        className={styles["person__remove"]}
-        onClick={() => {
-          setPersons((prev) => prev.filter((_, i) => i !== index));
-        }}
-      >
+    <div key={id} className={styles["person"]}>
+      <div className={styles["person__remove"]} onClick={handleRemovePerson}>
         X
       </div>
       <div className={styles["person__name"]}>
@@ -58,18 +79,7 @@ const Person = ({ index, person, setPersons }: PersonProps) => {
           className={styles["person__name-input"]}
           type="text"
           placeholder="New person"
-          onChange={(e) => {
-            setPersons((prev) =>
-              prev.map((person, i) =>
-                i === index
-                  ? {
-                      ...person,
-                      name: e.target.value,
-                    }
-                  : person
-              )
-            );
-          }}
+          onChange={handleNameChange}
           value={name}
         />
       </div>
@@ -78,43 +88,31 @@ const Person = ({ index, person, setPersons }: PersonProps) => {
           <input
             className={styles["person__days-input"]}
             type="text"
-            name={`days${index}`}
-            id={`days${index}`}
-            placeholder={`Days ${index}`}
-            onChange={(e) => {
-              setPersons((prev) =>
-                prev.map((person, i) =>
-                  i === index
-                    ? {
-                        ...person,
-                        days: parseFloat(e.target.value) || "",
-                      }
-                    : person
-                )
-              );
-            }}
+            name={`days${id}`}
+            id={`days${id}`}
+            placeholder={`Days ${id}`}
+            onChange={handleDaysChange}
             value={days}
           />
           <p className={styles["person__days-title"]}>Days</p>
         </div>
         <div className={styles["person__gastos"]}>
-          <p className={styles["person__gastos-value"]}>
-            {(Math.ceil(gastos * 100) / 100).toFixed(2)}
-          </p>
+          <p className={styles["person__gastos-value"]}>{roundUp(gastos)}</p>
           <p className={styles["person__gastos-title"]}>Gastos</p>
         </div>
       </div>
       {extras.map((extra, indexExtra) => {
         return (
           <input
+            key={indexExtra}
             type="text"
             value={extra}
             name={`extra${indexExtra}`}
-            onChange={(e) => handleExtras(e, indexExtra, index)}
+            onChange={(e) => handleExtras(e, indexExtra)}
           />
         );
       })}
-      <button onClick={(e) => handleAddExtras(e, index)}>Add extra</button>
+      <button onClick={handleAddExtras}>Add extra</button>
     </div>
   );
 };
