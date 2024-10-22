@@ -5,9 +5,6 @@ const arraySum = (array: string[]) =>
   );
 
 const roundUp = (value: number, digitsAfterPoint: number = 2) =>
-  (
-    Math.ceil(value * (10 ^ digitsAfterPoint)) /
-    (10 ^ digitsAfterPoint)
-  ).toFixed(digitsAfterPoint);
+  value.toFixed(digitsAfterPoint);
 
 export { roundUp, arraySum };
