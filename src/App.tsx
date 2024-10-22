@@ -19,7 +19,8 @@ function App() {
       prev.map((person) => {
         const personsExtras = arraySum(person.extras);
         const gasto = ((person.days || 0) / (daysTotal || 0)) * (total || 0);
-        const personsDebt = (extraTotal - personsExtras) / (persons.length - 1);
+        const personsDebt =
+          (extraTotal - personsExtras) / Math.max(1, persons.length - 1);
 
         return {
           ...person,
