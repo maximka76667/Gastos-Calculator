@@ -1,29 +1,33 @@
 import React, { useEffect, useState } from "react";
 import styles from "./App.module.css";
 import Cookies from "js-cookie";
-
-interface Person {
-  name: string;
-  days: number | "";
-  gastos: number;
-}
+import { arraySum } from "./utils";
+import { PersonInterface } from "./types";
+import Person from "./components/Person/Person";
 
 function App() {
   const [total, setTotal] = useState<number | "">(0);
   const [daysTotal, setDaysTotal] = useState<number | "">(0);
+  const [extraTotal, setExtraTotal] = useState<number>(0);
 
-  const [persons, setPersons] = useState<Person[]>([]);
+  const [persons, setPersons] = useState<PersonInterface[]>([]);
 
   const [isInitialized, setIsInitialized] = useState(false); // New flag
 
   useEffect(() => {
     setPersons((prev) =>
-      prev.map((person) => ({
-        ...person,
-        gastos: ((person.days || 0) / (daysTotal || 0)) * (total || 0),
-      }))
+      prev.map((person) => {
+        const personsExtras = arraySum(person.extras);
+        const gasto = ((person.days || 0) / (daysTotal || 0)) * (total || 0);
+        const personsDebt = (extraTotal - personsExtras) / (persons.length - 1);
+
+        return {
+          ...person,
+          gastos: gasto + personsDebt - personsExtras,
+        };
+      })
     );
-  }, [total, daysTotal]);
+  }, [total, daysTotal, persons, extraTotal]);
 
   useEffect(() => {
     const cookiesPersons = Cookies.get("persons");
@@ -32,7 +36,6 @@ function App() {
     }
 
     const cookiesTotal = Cookies.get("total");
-    console.log(cookiesTotal);
     if (cookiesTotal) {
       setTotal(JSON.parse(cookiesTotal));
     }
@@ -45,6 +48,9 @@ function App() {
       setDaysTotal(
         persons.reduce((prev, person) => prev + (person.days || 0), 0)
       );
+      setExtraTotal(
+        persons.reduce((sum, person) => sum + arraySum(person.extras), 0)
+      );
       Cookies.set("persons", JSON.stringify(persons), {
         path: "/Gastos-Calculator",
       });
@@ -53,7 +59,6 @@ function App() {
 
   useEffect(() => {
     if (isInitialized) {
-      console.log(JSON.stringify(total));
       Cookies.set("total", JSON.stringify(total), {
         path: "/Gastos-Calculator",
       });
@@ -74,77 +79,26 @@ function App() {
             setTotal(parseFloat(e.target.value) || "");
           }}
         />
+        <p>Total extra:{extraTotal}</p>
         <div className={styles["persons__list"]}>
-          {persons.map(({ name, days, gastos }, index) => {
+          {persons.map((person, index) => {
             return (
-              <div key={index} className={styles["person"]}>
-                <div
-                  className={styles["person__remove"]}
-                  onClick={() => {
-                    setPersons((prev) => prev.filter((_, i) => i !== index));
-                  }}
-                >
-                  X
-                </div>
-                <div className={styles["person__name"]}>
-                  <input
-                    className={styles["person__name-input"]}
-                    type="text"
-                    placeholder="New person"
-                    onChange={(e) => {
-                      setPersons((prev) =>
-                        prev.map((person, i) =>
-                          i === index
-                            ? {
-                                ...person,
-                                name: e.target.value,
-                              }
-                            : person
-                        )
-                      );
-                    }}
-                    value={name}
-                  />
-                </div>
-                <div className={styles["person__info"]}>
-                  <div className={styles["person__days"]}>
-                    <input
-                      className={styles["person__days-input"]}
-                      type="text"
-                      name={`days${index}`}
-                      id={`days${index}`}
-                      placeholder={`Days ${index}`}
-                      onChange={(e) => {
-                        setPersons((prev) =>
-                          prev.map((person, i) =>
-                            i === index
-                              ? {
-                                  ...person,
-                                  days: parseFloat(e.target.value) || "",
-                                }
-                              : person
-                          )
-                        );
-                      }}
-                      value={days}
-                    />
-                    <p className={styles["person__days-title"]}>Days</p>
-                  </div>
-                  <div className={styles["person__gastos"]}>
-                    <p className={styles["person__gastos-value"]}>
-                      {(Math.ceil(gastos * 100) / 100).toFixed(2)}
-                    </p>
-                    <p className={styles["person__gastos-title"]}>Gastos</p>
-                  </div>
-                </div>
-              </div>
+              <Person
+                key={index}
+                index={index}
+                person={person}
+                setPersons={setPersons}
+              />
             );
           })}
         </div>
         <button
           className={styles["persons_add-button"]}
           onClick={() =>
-            setPersons((prev) => [...prev, { name: "", days: 30, gastos: 0 }])
+            setPersons((prev) => [
+              ...prev,
+              { name: "", days: 30, gastos: 0, extras: [] },
+            ])
           }
         >
           Add
