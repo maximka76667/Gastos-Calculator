@@ -101,7 +101,7 @@ function App() {
             ])
           }
         >
-          Add
+          Add person
         </button>
       </div>
     </div>

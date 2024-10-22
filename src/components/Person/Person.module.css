@@ -7,8 +7,6 @@
   margin: 50px 0 30px;
 }
 
-
-
 .person {
   display: flex;
   width: 45%;
@@ -102,27 +100,6 @@
   padding: 5px 0;
   margin: 0;
   font-family: inherit;
-}
-
-.persons_add-button {
-  margin: 20px;
-  max-width: 500px;
-  width: calc(100% - 120px);
-  height: 50px;
-  padding: 10px 0;
-  font-size: 20px;
-  position: relative;
-  transition: all 0.2s;
-  border: 0;
-  background-color: #222;
-  color: #ffc800;
-  box-shadow: 0.3em 0.3em 0 0 #ffc800, inset 0.3em 0.3em 0 0 #ffc800;
-}
-
-.persons_add-button:hover,
-.persons_add-button:focus {
-  box-shadow: 0 0 0 0 #ffc800, inset 6em 3.5em 0 0 #ffc800;
-  color: #222;
 }
 
 @media (max-width: 1280px) {
