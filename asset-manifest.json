@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/Gastos-Calculator/static/css/main.b8c7ca07.css",
-    "main.js": "/Gastos-Calculator/static/js/main.4cc6c34d.js",
+    "main.js": "/Gastos-Calculator/static/js/main.a4fb92dd.js",
     "static/js/453.1a33766c.chunk.js": "/Gastos-Calculator/static/js/453.1a33766c.chunk.js",
     "index.html": "/Gastos-Calculator/index.html",
     "main.b8c7ca07.css.map": "/Gastos-Calculator/static/css/main.b8c7ca07.css.map",
-    "main.4cc6c34d.js.map": "/Gastos-Calculator/static/js/main.4cc6c34d.js.map",
+    "main.a4fb92dd.js.map": "/Gastos-Calculator/static/js/main.a4fb92dd.js.map",
     "453.1a33766c.chunk.js.map": "/Gastos-Calculator/static/js/453.1a33766c.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.b8c7ca07.css",
-    "static/js/main.4cc6c34d.js"
+    "static/js/main.a4fb92dd.js"
   ]
 }
