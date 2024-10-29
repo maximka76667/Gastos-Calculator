@@ -1,3 +1,15 @@
+@keyframes shacking {
+  0% {
+    transform: rotate(0) scale(1);
+  }
+  50% {
+    transform: rotate(15deg) scale(1.1);
+  }
+  100% {
+    transform: rotate(0) scale(1);
+  }
+}
+
 .app {
   display: flex;
   flex-direction: column;
@@ -16,30 +28,58 @@
   box-sizing: border-box;
 }
 
+.persons__total {
+  font-family: "Gloria Hallelujah";
+  width: 10%;
+  font-size: 3rem;
+  margin: 50px 0 30px;
+  text-align: center;
+}
+
 .persons__list {
-  min-width: 100%;
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(300px, 1fr));
+  gap: 20px;
 }
 
 .persons_add-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 30%;
   margin: 20px;
-  max-width: 500px;
-  width: calc(100% - 120px);
-  height: 50px;
-  padding: 10px 0;
+  padding: 15px;
   font-size: 20px;
-  position: relative;
   transition: all 0.2s;
+  background-color: transparent;
   border: 0;
-  background-color: #222;
-  color: #ffc800;
-  box-shadow: 0.3em 0.3em 0 0 #ffc800, inset 0.3em 0.3em 0 0 #ffc800;
+  overflow: hidden;
 }
 
-.persons_add-button:hover,
-.persons_add-button:focus {
-  box-shadow: 0 0 0 0 #ffc800, inset 6em 3.5em 0 0 #ffc800;
-  color: #222;
+.persons_add-button img {
+  width: 100px;
+  height: 100px;
+}
+
+.persons_add-button img:hover,
+.persons_add-button img:focus {
+  animation: infinite shacking 0.8s;
+}
+
+@media (max-width: 1920px) {
+  .persons__list {
+    grid-template-columns: repeat(3, minmax(300px, 1fr));
+  }
+}
+
+@media (max-width: 1280px) {
+  .persons__list {
+    grid-template-columns: repeat(2, minmax(300px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .persons__list {
+    grid-template-columns: repeat(1, minmax(300px, 1fr));
+  }
 }

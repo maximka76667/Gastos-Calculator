@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import styles from "./App.module.css";
 import Cookies from "js-cookie";
 import { arraySum } from "./utils";
 import { PersonInterface } from "./types";
 import Person from "./components/Person/Person";
+import Plus2 from "./assets/images/Vector Line Scribbles (Community)/Plus 02.svg";
 
 function App() {
   const [total, setTotal] = useState<number | "">(0);
@@ -14,18 +15,34 @@ function App() {
 
   const [isInitialized, setIsInitialized] = useState(false); // New flag
 
-  function calculateGastos(person: PersonInterface) {
-    // Electricy, water and etc bills part in relation to days
-    const gasto = ((person.days || 0) / daysTotal) * (total || 0);
+  // function calculateGastos(person: PersonInterface) {
+  //   // Electricy, water and etc bills part in relation to days
+  //   const gasto = ((person.days || 0) / daysTotal) * (total || 0);
 
-    // All persons expenses
-    const personsExtras = arraySum(person.extras);
+  //   // All persons expenses
+  //   const personsExtras = arraySum(person.extras);
 
-    // How much this person debts to others
-    const personsDebt = extraTotal / Math.max(1, persons.length);
+  //   // How much this person debts to others
+  //   const personsDebt = extraTotal / Math.max(1, persons.length);
 
-    return gasto + personsDebt - personsExtras;
-  }
+  //   return gasto + personsDebt - personsExtras;
+  // }
+
+  const calculateGastos = useCallback(
+    (person: PersonInterface) => {
+      // Electricy, water and etc bills part in relation to days
+      const gasto = ((person.days || 0) / daysTotal) * (total || 0);
+
+      // All persons expenses
+      const personsExtras = arraySum(person.extras);
+
+      // How much this person debts to others
+      const personsDebt = extraTotal / Math.max(1, persons.length);
+
+      return gasto + personsDebt - personsExtras;
+    },
+    [extraTotal, daysTotal, total, persons.length]
+  );
 
   useEffect(() => {
     setPersons((prev) =>
@@ -36,18 +53,14 @@ function App() {
         };
       })
     );
-  }, [total, daysTotal, extraTotal]);
+  }, [total, daysTotal, extraTotal, calculateGastos]);
 
   useEffect(() => {
     const cookiesPersons = Cookies.get("persons");
-    if (cookiesPersons) {
-      setPersons(JSON.parse(cookiesPersons));
-    }
-
     const cookiesTotal = Cookies.get("total");
-    if (cookiesTotal) {
-      setTotal(JSON.parse(cookiesTotal));
-    }
+
+    if (cookiesPersons) setPersons(JSON.parse(cookiesPersons));
+    if (cookiesTotal) setTotal(JSON.parse(cookiesTotal));
 
     setIsInitialized(true);
   }, []);
@@ -56,12 +69,26 @@ function App() {
     // If app already loaded
     // recalculate total days and total extras on every persons array change
     if (isInitialized) {
-      setDaysTotal(
-        persons.reduce((prev, person) => prev + (person.days || 0), 0)
+      // Go through all persons and calculate
+      // 1. sum of days
+      // 2. sum of extra expenses
+      const { newDaysTotal, newExtraExpensesTotal } = persons.reduce(
+        (totals, person) => {
+          const days = totals.newDaysTotal + (person.days || 0);
+          const extraExpenses =
+            totals.newExtraExpensesTotal + arraySum(person.extras);
+
+          return {
+            newDaysTotal: days,
+            newExtraExpensesTotal: extraExpenses,
+          };
+        },
+        { newDaysTotal: 0, newExtraExpensesTotal: 0 }
       );
-      setExtraTotal(
-        persons.reduce((sum, person) => sum + arraySum(person.extras), 0)
-      );
+
+      setDaysTotal(newDaysTotal);
+      setExtraTotal(newExtraExpensesTotal);
+
       Cookies.set("persons", JSON.stringify(persons), {
         path: "/Gastos-Calculator",
       });
@@ -91,7 +118,6 @@ function App() {
             setTotal(parseFloat(e.target.value) || "");
           }}
         />
-        <p>Total extra:{extraTotal}</p>
         <div className={styles["persons__list"]}>
           {persons.map((person, index) => {
             return (
@@ -113,7 +139,7 @@ function App() {
             ])
           }
         >
-          Add person
+          <img src={Plus2} />
         </button>
       </div>
     </div>
