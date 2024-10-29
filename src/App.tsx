@@ -15,19 +15,6 @@ function App() {
 
   const [isInitialized, setIsInitialized] = useState(false); // New flag
 
-  // function calculateGastos(person: PersonInterface) {
-  //   // Electricy, water and etc bills part in relation to days
-  //   const gasto = ((person.days || 0) / daysTotal) * (total || 0);
-
-  //   // All persons expenses
-  //   const personsExtras = arraySum(person.extras);
-
-  //   // How much this person debts to others
-  //   const personsDebt = extraTotal / Math.max(1, persons.length);
-
-  //   return gasto + personsDebt - personsExtras;
-  // }
-
   const calculateGastos = useCallback(
     (person: PersonInterface) => {
       // Electricy, water and etc bills part in relation to days
@@ -139,7 +126,7 @@ function App() {
             ])
           }
         >
-          <img src={Plus2} />
+          <img src={Plus2} alt="Divider line" />
         </button>
       </div>
     </div>

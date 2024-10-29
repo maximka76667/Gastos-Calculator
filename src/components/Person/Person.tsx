@@ -4,12 +4,8 @@ import styles from "./Person.module.css";
 import { round } from "../../utils";
 import ExtraExpensesListItem from "../ExtraExpensesListItem/ExtraExpensesListItem";
 import StraightLine2 from "../../assets/images/Horizontal Straight Long Line 02.svg";
-import MedLine2 from "../../assets/images/Horizontal Straight Med Line 04.svg";
 import VerticalStraightLine01 from "../../assets/images/Vector Line Scribbles (Community)/Vertical Straight Line 01.svg";
-import VerticalStraightLine02 from "../../assets/images/Vector Line Scribbles (Community)/Vertical Straight Line 02.svg";
-import XMark04 from "../../assets/images/Vector Line Scribbles (Community)/X Mark 04.svg";
 import Plus1 from "../../assets/images/Vector Line Scribbles (Community)/Plus 01.svg";
-import Squiggle12 from "../../assets/images/Vector Line Scribbles (Community)/Squiggle Mini 12.svg";
 
 interface PersonProps {
   id: number;
@@ -32,32 +28,6 @@ const Person = ({ id, person, setPersons }: PersonProps) => {
 
   return (
     <div key={id} className={styles["person"]}>
-      {/* <img className={styles["person__frame-top"]} src={MedLine2} /> */}
-      {/* {id % 2 === 0 ? (
-        <>
-          <img
-            className={styles["person__frame-left-side"]}
-            src={VerticalStraightLine01}
-          />
-
-          <img
-            className={styles["person__frame-right-side"]}
-            src={VerticalStraightLine02}
-          />
-        </>
-      ) : (
-        <>
-          <img
-            className={styles["person__frame-left-side"]}
-            src={VerticalStraightLine02}
-          />
-          <img
-            className={styles["person__frame-right-side"]}
-            src={VerticalStraightLine01}
-          />
-        </>
-      )} */}
-
       <div className={styles["person__remove"]} onClick={removePerson}>
         X
       </div>
@@ -71,7 +41,11 @@ const Person = ({ id, person, setPersons }: PersonProps) => {
         />
       </div>
 
-      <img className={styles["person__frame-top"]} src={StraightLine2} />
+      <img
+        className={styles["person__frame-top"]}
+        src={StraightLine2}
+        alt="Divider line"
+      />
       <h2 className={styles["person__extra-title"]}>Extra expenses</h2>
       {extras.map((extra, indexExtra) => (
         <Fragment key={indexExtra}>
@@ -91,6 +65,7 @@ const Person = ({ id, person, setPersons }: PersonProps) => {
           <img
             className={styles["person__frame-list-divider"]}
             src={StraightLine2}
+            alt="Divider line"
           />
         </Fragment>
       ))}
@@ -99,11 +74,12 @@ const Person = ({ id, person, setPersons }: PersonProps) => {
         className={styles["button_add-extra"]}
         onClick={() => updatePerson("extras", [...person.extras, ""])}
       >
-        <img src={Plus1} />
+        <img src={Plus1} alt="Divider line" />
       </button>
       <img
         style={{ width: "90%", transform: "rotate(1deg)" }}
         src={StraightLine2}
+        alt="Divider line"
       />
       <div className={styles["person__info"]}>
         <div className={styles["person__days"]}>
@@ -120,7 +96,11 @@ const Person = ({ id, person, setPersons }: PersonProps) => {
           />
           <p className={styles["person__days-title"]}>Days</p>
         </div>
-        <img style={{ height: "120px" }} src={VerticalStraightLine01} />
+        <img
+          style={{ height: "120px" }}
+          src={VerticalStraightLine01}
+          alt="Divider line"
+        />
         <div className={styles["person__gastos"]}>
           <p className={styles["person__gastos-value"]}>{round(gastos)}</p>
           <p className={styles["person__gastos-title"]}>Expenses</p>
