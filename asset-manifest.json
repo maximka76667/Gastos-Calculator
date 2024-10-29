@@ -1,15 +1,23 @@
 {
   "files": {
-    "main.css": "/Gastos-Calculator/static/css/main.b8c7ca07.css",
-    "main.js": "/Gastos-Calculator/static/js/main.a62dbc92.js",
+    "main.css": "/Gastos-Calculator/static/css/main.7e300b32.css",
+    "main.js": "/Gastos-Calculator/static/js/main.f036572d.js",
     "static/js/453.1a33766c.chunk.js": "/Gastos-Calculator/static/js/453.1a33766c.chunk.js",
+    "static/media/Itim-Regular.ttf": "/Gastos-Calculator/static/media/Itim-Regular.38b1e6579a4ae98f4318.ttf",
+    "static/media/RockSalt-Regular.ttf": "/Gastos-Calculator/static/media/RockSalt-Regular.95f10efb43f0ccd46405.ttf",
+    "static/media/GloriaHallelujah-Regular.ttf": "/Gastos-Calculator/static/media/GloriaHallelujah-Regular.c9da976c6f9088d1b3c9.ttf",
+    "static/media/NothingYouCouldDo-Regular.ttf": "/Gastos-Calculator/static/media/NothingYouCouldDo-Regular.3170b8e5d362ca787108.ttf",
+    "static/media/Horizontal Straight Long Line 02.svg": "/Gastos-Calculator/static/media/Horizontal Straight Long Line 02.6a28be17967ca09abc355b5baaa3138d.svg",
+    "static/media/Plus 02.svg": "/Gastos-Calculator/static/media/Plus 02.743704e4f77e0006e9ca198f5076ee5e.svg",
+    "static/media/Plus 01.svg": "/Gastos-Calculator/static/media/Plus 01.8a315c32584d0e45929d5dbae527cab0.svg",
     "index.html": "/Gastos-Calculator/index.html",
-    "main.b8c7ca07.css.map": "/Gastos-Calculator/static/css/main.b8c7ca07.css.map",
-    "main.a62dbc92.js.map": "/Gastos-Calculator/static/js/main.a62dbc92.js.map",
+    "static/media/Vertical Straight Line 01.svg": "/Gastos-Calculator/static/media/Vertical Straight Line 01.0edfbf90272290ae0f28a8884c4b0a09.svg",
+    "main.7e300b32.css.map": "/Gastos-Calculator/static/css/main.7e300b32.css.map",
+    "main.f036572d.js.map": "/Gastos-Calculator/static/js/main.f036572d.js.map",
     "453.1a33766c.chunk.js.map": "/Gastos-Calculator/static/js/453.1a33766c.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.b8c7ca07.css",
-    "static/js/main.a62dbc92.js"
+    "static/css/main.7e300b32.css",
+    "static/js/main.f036572d.js"
   ]
 }
