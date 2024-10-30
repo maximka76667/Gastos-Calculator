@@ -1,11 +1,100 @@
-.extra-exprense {
+@keyframes erasing {
+  0% {
+    transform: translate(-20px, -15px);
+  }
+  25% {
+    transform: translate(-50px, 0);
+  }
+  50% {
+    transform: translate(-100px, -15px);
+  }
+  75% {
+    transform: translate(-150px, 0);
+  }
+  100% {
+    transform: translate(-600%, -15px);
+  }
+}
+
+@keyframes erasing-item {
+  0% {
+    width: 0;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+.extra-expense {
+  display: flex;
+  width: 70%;
+  position: relative;
+  padding: 5px 70px;
+}
+
+.extra-expense__name {
   font-family: inherit;
   background-color: transparent;
   border: 0;
   text-align: center;
   font-size: 30px;
-  width: 40%;
+  width: 70%;
   background-color: #f9ce7353;
   border-radius: 15px;
   margin: 5px;
+  padding: 1px;
+}
+
+.extra-expense__value {
+  font-family: inherit;
+  background-color: transparent;
+  border: 0;
+  text-align: center;
+  font-size: 30px;
+  width: 30%;
+  background-color: #f9ce7353;
+  border-radius: 15px;
+  margin: 5px;
+}
+
+.extra-expense__value::placeholder {
+  font-size: 1.5rem;
+}
+
+.extra-expense__remove-button {
+  background-color: transparent;
+  border: 0;
+}
+
+.extra-expense__remove-button img {
+  height: 70px;
+  object-fit: contain;
+  visibility: hidden;
+  position: absolute;
+  right: 20px;
+  top: -15px;
+  opacity: 0;
+  transition: all 0.4s ease-in-out;
+}
+
+.extra-expense:hover img {
+  visibility: visible;
+  opacity: 1;
+}
+
+.extra-expense__remove-button_animated img {
+  opacity: 1;
+  visibility: visible;
+  animation: forwards erasing 0.5s;
+}
+
+.extra-expense__erasing-div {
+  position: absolute;
+  right: 0;
+  background-color: #fff4bc;
+  height: 90%;
+}
+
+.extra-expense__erasing-div_animated {
+  animation: forwards erasing-item 1s ease;
 }

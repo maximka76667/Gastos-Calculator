@@ -47,28 +47,36 @@ const Person = ({ id, person, setPersons }: PersonProps) => {
         alt="Divider line"
       />
       <h2 className={styles["person__extra-title"]}>Extra expenses</h2>
-      {extras.map((extra, indexExtra) => (
-        <Fragment key={indexExtra}>
-          <ExtraExpensesListItem
-            extra={extra}
-            index={indexExtra}
-            onExtraExpenseChange={(index, newValue) =>
-              updatePerson(
-                "extras",
-                extras.map((extra, i) => {
-                  return i === index ? newValue : extra;
-                })
-              )
-            }
-          />
+      <div className={styles["person_extra-expenses-list"]}>
+        {extras.map((extra, indexExtra) => (
+          <Fragment key={indexExtra}>
+            <ExtraExpensesListItem
+              extra={extra}
+              index={indexExtra}
+              onExtraExpenseChange={(index, newValue) =>
+                updatePerson(
+                  "extras",
+                  extras.map((extra, i) => {
+                    return i === index ? newValue : extra;
+                  })
+                )
+              }
+              onExtraExpenseRemove={(index) =>
+                updatePerson(
+                  "extras",
+                  extras.filter((extra, i) => index !== i)
+                )
+              }
+            />
 
-          <img
-            className={styles["person__frame-list-divider"]}
-            src={StraightLine2}
-            alt="Divider line"
-          />
-        </Fragment>
-      ))}
+            <img
+              className={styles["person__frame-list-divider"]}
+              src={StraightLine2}
+              alt="Divider line"
+            />
+          </Fragment>
+        ))}
+      </div>
 
       <button
         className={styles["button_add-extra"]}
@@ -106,7 +114,6 @@ const Person = ({ id, person, setPersons }: PersonProps) => {
           <p className={styles["person__gastos-title"]}>Expenses</p>
         </div>
       </div>
-      {/* <img className={styles["person__frame-bottom"]} src={MedLine2} /> */}
     </div>
   );
 };

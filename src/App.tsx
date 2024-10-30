@@ -21,7 +21,11 @@ function App() {
       const gasto = ((person.days || 0) / daysTotal) * (total || 0);
 
       // All persons expenses
-      const personsExtras = arraySum(person.extras);
+      const arrayOfExtrasValues = person.extras.map(
+        (extra) => Object.values(extra)[0]
+      );
+
+      const personsExtras = arraySum(arrayOfExtrasValues);
 
       // How much this person debts to others
       const personsDebt = extraTotal / Math.max(1, persons.length);
@@ -62,8 +66,13 @@ function App() {
       const { newDaysTotal, newExtraExpensesTotal } = persons.reduce(
         (totals, person) => {
           const days = totals.newDaysTotal + (person.days || 0);
+
+          const arrayOfExtrasValues = person.extras.map(
+            (extra) => Object.values(extra)[0]
+          );
+
           const extraExpenses =
-            totals.newExtraExpensesTotal + arraySum(person.extras);
+            totals.newExtraExpensesTotal + arraySum(arrayOfExtrasValues);
 
           return {
             newDaysTotal: days,

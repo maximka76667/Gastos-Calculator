@@ -61,8 +61,8 @@
   height: 100px;
 }
 
-.persons_add-button img:hover,
-.persons_add-button img:focus {
+.persons_add-button:hover img,
+.persons_add-button:focus img {
   animation: infinite shacking 0.8s;
 }
 

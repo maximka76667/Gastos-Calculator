@@ -64,6 +64,13 @@
   font-family: "Itim", cursive;
 }
 
+.person_extra-expenses-list {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
 .person__remove {
   position: absolute;
   top: 5px;
