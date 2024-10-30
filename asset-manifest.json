@@ -1,6 +1,6 @@
 {
   "files": {
-    "main.css": "/Gastos-Calculator/static/css/main.a6144221.css",
+    "main.css": "/Gastos-Calculator/static/css/main.68f2fdfc.css",
     "main.js": "/Gastos-Calculator/static/js/main.d54b264b.js",
     "static/js/453.1a33766c.chunk.js": "/Gastos-Calculator/static/js/453.1a33766c.chunk.js",
     "static/media/eraser.png": "/Gastos-Calculator/static/media/eraser.170444447aa3848cadc9.png",
@@ -13,12 +13,12 @@
     "static/media/Plus 01.svg": "/Gastos-Calculator/static/media/Plus 01.8a315c32584d0e45929d5dbae527cab0.svg",
     "index.html": "/Gastos-Calculator/index.html",
     "static/media/Vertical Straight Line 01.svg": "/Gastos-Calculator/static/media/Vertical Straight Line 01.0edfbf90272290ae0f28a8884c4b0a09.svg",
-    "main.a6144221.css.map": "/Gastos-Calculator/static/css/main.a6144221.css.map",
+    "main.68f2fdfc.css.map": "/Gastos-Calculator/static/css/main.68f2fdfc.css.map",
     "main.d54b264b.js.map": "/Gastos-Calculator/static/js/main.d54b264b.js.map",
     "453.1a33766c.chunk.js.map": "/Gastos-Calculator/static/js/453.1a33766c.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.a6144221.css",
+    "static/css/main.68f2fdfc.css",
     "static/js/main.d54b264b.js"
   ]
 }
