@@ -123,6 +123,7 @@
   background-color: #f9ce7353;
   width: 50%;
   box-sizing: border-box;
+  padding: 5px 0;
 }
 
 .person__days {
