@@ -1,0 +1,49 @@
+scalar Date
+
+type User {
+  id: ID!
+  email: String!
+  fullName: String!
+  username: String!
+  password: String!
+  preferredCurrency: String!
+  role(group_id: ID!): Role
+  participatesIn: [Group!]!
+}
+
+type Group {
+  id: ID!
+  name: String!
+  created_at: Date!
+  members: [User!]!
+}
+
+type Expense {
+  id: ID!
+  user: User!
+  group: Group!
+  amount: Float!
+  isMain: Boolean!
+  name: String!
+  currencyCode: String!
+  lastModified: Date!
+}
+
+type Role {
+  id: ID!
+  name: String!
+}
+
+type GroupUser {
+  user: User!
+  group: Group!
+  role: Role!
+}
+
+type Query {
+  users: [User!]!
+  user(id: ID!): User
+  groups: [Group!]!
+  group(id: ID!): Group
+  expenses(groupId: ID!): [Expense!]!
+}
