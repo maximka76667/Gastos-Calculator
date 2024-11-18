@@ -8,123 +8,196 @@ import (
 	"context"
 	"fmt"
 	"gastos-counter-api/graph/model"
+	"gastos-counter-api/helpers"
 )
+
+// User is the resolver for the user field.
+func (r *expenseResolver) User(ctx context.Context, obj *model.Expense) (*model.User, error) {
+	return helpers.GetUserByID(r.DB, obj.UserId)
+}
+
+// Group is the resolver for the group field.
+func (r *expenseResolver) Group(ctx context.Context, obj *model.Expense) (*model.Group, error) {
+	return helpers.GetGroupById(r.DB, obj.GroupId)
+}
 
 // Members is the resolver for the members field.
 func (r *groupResolver) Members(ctx context.Context, obj *model.Group) ([]*model.User, error) {
-	return nil, nil
+	return helpers.GetUsersByGroupId(r.DB, obj.ID)
 }
 
 // User is the resolver for the user field.
 func (r *groupUserResolver) User(ctx context.Context, obj *model.GroupUser) (*model.User, error) {
-	panic(fmt.Errorf("not implemented: User - user"))
+	return helpers.GetUserByID(r.DB, obj.UserId)
 }
 
 // Group is the resolver for the group field.
 func (r *groupUserResolver) Group(ctx context.Context, obj *model.GroupUser) (*model.Group, error) {
-	panic(fmt.Errorf("not implemented: Group - group"))
+	return helpers.GetGroupById(r.DB, obj.GroupId)
 }
 
 // Role is the resolver for the role field.
 func (r *groupUserResolver) Role(ctx context.Context, obj *model.GroupUser) (*model.Role, error) {
-	panic(fmt.Errorf("not implemented: Role - role"))
+	return helpers.GetRoleById(r.DB, obj.RoleId)
+}
+
+// AddUser is the resolver for the addUser field.
+func (r *mutationResolver) AddUser(ctx context.Context, user model.UserInput) (*model.User, error) {
+	panic(fmt.Errorf("not implemented: AddUser - addUser"))
+}
+
+// EditUser is the resolver for the editUser field.
+func (r *mutationResolver) EditUser(ctx context.Context, id string, user model.UserInput) (*model.User, error) {
+	panic(fmt.Errorf("not implemented: EditUser - editUser"))
+}
+
+// DeleteUser is the resolver for the deleteUser field.
+func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (*model.User, error) {
+	panic(fmt.Errorf("not implemented: DeleteUser - deleteUser"))
+}
+
+// AddGroup is the resolver for the addGroup field.
+func (r *mutationResolver) AddGroup(ctx context.Context, group model.GroupInput) (*model.Group, error) {
+	panic(fmt.Errorf("not implemented: AddGroup - addGroup"))
+}
+
+// EditGroup is the resolver for the editGroup field.
+func (r *mutationResolver) EditGroup(ctx context.Context, id string, group model.GroupInput) (*model.Group, error) {
+	panic(fmt.Errorf("not implemented: EditGroup - editGroup"))
+}
+
+// DeleteGroup is the resolver for the deleteGroup field.
+func (r *mutationResolver) DeleteGroup(ctx context.Context, id string) (*model.Group, error) {
+	panic(fmt.Errorf("not implemented: DeleteGroup - deleteGroup"))
+}
+
+// AddExpense is the resolver for the addExpense field.
+func (r *mutationResolver) AddExpense(ctx context.Context, expense model.ExpenseInput) (*model.Expense, error) {
+	panic(fmt.Errorf("not implemented: AddExpense - addExpense"))
+}
+
+// EditExpense is the resolver for the editExpense field.
+func (r *mutationResolver) EditExpense(ctx context.Context, id string, expense model.ExpenseInput) (*model.Expense, error) {
+	panic(fmt.Errorf("not implemented: EditExpense - editExpense"))
+}
+
+// DeleteExpense is the resolver for the deleteExpense field.
+func (r *mutationResolver) DeleteExpense(ctx context.Context, id string) (*model.Expense, error) {
+	panic(fmt.Errorf("not implemented: DeleteExpense - deleteExpense"))
+}
+
+// AddRole is the resolver for the addRole field.
+func (r *mutationResolver) AddRole(ctx context.Context, role model.RoleInput) (*model.Role, error) {
+	panic(fmt.Errorf("not implemented: AddRole - addRole"))
+}
+
+// EditRole is the resolver for the editRole field.
+func (r *mutationResolver) EditRole(ctx context.Context, id string, role model.RoleInput) (*model.Role, error) {
+	panic(fmt.Errorf("not implemented: EditRole - editRole"))
+}
+
+// DeleteRole is the resolver for the deleteRole field.
+func (r *mutationResolver) DeleteRole(ctx context.Context, id string) (*model.Role, error) {
+	panic(fmt.Errorf("not implemented: DeleteRole - deleteRole"))
+}
+
+// AddGroupUser is the resolver for the addGroupUser field.
+func (r *mutationResolver) AddGroupUser(ctx context.Context, groupUser model.GroupUserInput) (*model.GroupUser, error) {
+	panic(fmt.Errorf("not implemented: AddGroupUser - addGroupUser"))
+}
+
+// EditGroupUser is the resolver for the editGroupUser field.
+func (r *mutationResolver) EditGroupUser(ctx context.Context, id string, groupUser model.GroupUserInput) (*model.GroupUser, error) {
+	panic(fmt.Errorf("not implemented: EditGroupUser - editGroupUser"))
+}
+
+// DeleteGroupUser is the resolver for the deleteGroupUser field.
+func (r *mutationResolver) DeleteGroupUser(ctx context.Context, id string) (*model.GroupUser, error) {
+	panic(fmt.Errorf("not implemented: DeleteGroupUser - deleteGroupUser"))
 }
 
 // Users is the resolver for the users field.
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
-	var users []*model.User
-
-	// Fetch raw users from the database
-	if err := r.DB.Find(&users).Error; err != nil {
-		return nil, fmt.Errorf("failed to fetch users: %w", err)
-	}
-
-	return users, nil
+	return helpers.GetUsers(r.DB)
 }
 
 // User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
-	// var user *model.User
-
-	// err := r.DB.Model(model.User{}).Where("id = ?", id).Select(&user).Error
-
-	// if err != nil {
-	// 	return nil, fmt.Errorf("failed to fetch user by id: %v", err)
-	// }
-
-	return nil, nil
+	return helpers.GetUserByID(r.DB, id)
 }
 
 // Groups is the resolver for the groups field.
 func (r *queryResolver) Groups(ctx context.Context) ([]*model.Group, error) {
-	// var groups []model.Group
-
-	// err := r.DB.Model(&groups).Select()
-
-	// if err != nil {
-	// 	return nil, fmt.Errorf("failed to fetch groups %v", err)
-	// }
-
-	// var result []*model.Group
-	// for _, group := range groups {
-	// 	result = append(result, &group)
-	// }
-
-	return nil, nil
+	return helpers.GetGroups(r.DB)
 }
 
 // Group is the resolver for the group field.
 func (r *queryResolver) Group(ctx context.Context, id string) (*model.Group, error) {
-	// var group model.Group
-
-	// err := r.DB.Model(&group).Where("id = ?", id).Select()
-
-	// if err != nil {
-	// 	return nil, fmt.Errorf("failed to fetch group by id: %v", err)
-	// }
-
-	return nil, nil
+	return helpers.GetGroupById(r.DB, id)
 }
 
 // Expenses is the resolver for the expenses field.
-func (r *queryResolver) Expenses(ctx context.Context, groupID string) ([]*model.Expense, error) {
-	panic(fmt.Errorf("not implemented: Expenses - expenses"))
+func (r *queryResolver) Expenses(ctx context.Context) ([]*model.Expense, error) {
+	return helpers.GetExpenses(r.DB)
+}
+
+// ExpensesByGroup is the resolver for the expensesByGroup field.
+func (r *queryResolver) ExpensesByGroup(ctx context.Context, groupID string) ([]*model.Expense, error) {
+	return helpers.GetExpensesByGroupId(r.DB, groupID)
+}
+
+// ExpensesByUser is the resolver for the expensesByUser field.
+func (r *queryResolver) ExpensesByUser(ctx context.Context, userID string) ([]*model.Expense, error) {
+	return helpers.GetExpensesByUserId(r.DB, userID)
+}
+
+// Expense is the resolver for the expense field.
+func (r *queryResolver) Expense(ctx context.Context, groupID string, userID string) (*model.Expense, error) {
+	return helpers.GetExpense(r.DB, groupID, userID)
+}
+
+// Roles is the resolver for the roles field.
+func (r *queryResolver) Roles(ctx context.Context) ([]*model.Role, error) {
+	return helpers.GetRoles(r.DB)
+}
+
+// Role is the resolver for the role field.
+func (r *queryResolver) Role(ctx context.Context, id string) (*model.Role, error) {
+	return helpers.GetRoleById(r.DB, id)
+}
+
+// GroupUsers is the resolver for the groupUsers field.
+func (r *queryResolver) GroupUsers(ctx context.Context) ([]*model.GroupUser, error) {
+	return helpers.GetGroupUsers(r.DB)
+}
+
+// GroupUsersByGroup is the resolver for the groupUsersByGroup field.
+func (r *queryResolver) GroupUsersByGroup(ctx context.Context, groupID string) ([]*model.GroupUser, error) {
+	return helpers.GetGroupUsersByGroup(r.DB, groupID)
+}
+
+// GroupUsersByUser is the resolver for the groupUsersByUser field.
+func (r *queryResolver) GroupUsersByUser(ctx context.Context, userID string) ([]*model.GroupUser, error) {
+	return helpers.GetGroupUsersByUser(r.DB, userID)
+}
+
+// GroupUser is the resolver for the groupUser field.
+func (r *queryResolver) GroupUser(ctx context.Context, groupID string, userID string) (*model.GroupUser, error) {
+	return helpers.GetGroupUser(r.DB, groupID, userID)
 }
 
 // Role is the resolver for the role field.
 func (r *userResolver) Role(ctx context.Context, obj *model.User, groupID string) (*model.Role, error) {
-	var role *model.Role
-
-	err := r.DB.Model(&model.Role{}).
-		Table("group_users").
-		Select("roles.id, roles.name").
-		Joins("JOIN roles ON group_users.role_id = roles.id").
-		Where("group_users.user_id = ? AND group_users.group_id = ?", obj.ID, groupID).
-		Scan(&role).Error
-
-	if err != nil {
-		return nil, err
-	}
-
-	return role, nil
+	return helpers.GetRole(r.DB, obj.ID, groupID)
 }
 
 // ParticipatesIn is the resolver for the participatesIn field.
 func (r *userResolver) ParticipatesIn(ctx context.Context, obj *model.User) ([]*model.Group, error) {
-	// Fetch groups from the `group_users` table for the given user ID
-	var groups []*model.Group
-
-	err := r.DB.Model(&model.Group{}).
-		Joins("JOIN group_users ON groups.id = group_users.group_id").
-		Where("group_users.user_id = ?", obj.ID).
-		Find(&groups).Error
-
-	if err != nil {
-		return nil, err
-	}
-
-	return groups, nil
+	return helpers.GetGroupsByUserId(r.DB, obj.ID)
 }
+
+// Expense returns ExpenseResolver implementation.
+func (r *Resolver) Expense() ExpenseResolver { return &expenseResolver{r} }
 
 // Group returns GroupResolver implementation.
 func (r *Resolver) Group() GroupResolver { return &groupResolver{r} }
@@ -132,13 +205,18 @@ func (r *Resolver) Group() GroupResolver { return &groupResolver{r} }
 // GroupUser returns GroupUserResolver implementation.
 func (r *Resolver) GroupUser() GroupUserResolver { return &groupUserResolver{r} }
 
+// Mutation returns MutationResolver implementation.
+func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
+
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
 // User returns UserResolver implementation.
 func (r *Resolver) User() UserResolver { return &userResolver{r} }
 
+type expenseResolver struct{ *Resolver }
 type groupResolver struct{ *Resolver }
 type groupUserResolver struct{ *Resolver }
+type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type userResolver struct{ *Resolver }

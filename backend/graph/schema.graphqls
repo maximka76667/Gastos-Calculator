@@ -11,11 +11,24 @@ type User {
   participatesIn: [Group!]!
 }
 
+input UserInput {
+  email: String!
+  fullName: String!
+  username: String!
+  password: String!
+  preferredCurrency: String!
+}
+
 type Group {
   id: ID!
   name: String!
   created_at: Date!
   members: [User!]!
+}
+
+input GroupInput {
+  name: String!
+  created_at: Date!
 }
 
 type Expense {
@@ -29,8 +42,22 @@ type Expense {
   lastModified: Date!
 }
 
+input ExpenseInput {
+  userId: ID!
+  groupId: ID!
+  amount: Float!
+  isMain: Boolean!
+  name: String!
+  currencyCode: String!
+  lastModified: Date!
+}
+
 type Role {
   id: ID!
+  name: String!
+}
+
+input RoleInput {
   name: String!
 }
 
@@ -40,10 +67,51 @@ type GroupUser {
   role: Role!
 }
 
+input GroupUserInput {
+  userId: ID!
+  groupId: ID!
+  roleId: ID!
+}
+
 type Query {
   users: [User!]!
-  user(id: ID!): User
+  user(id: ID!): User!
+
   groups: [Group!]!
-  group(id: ID!): Group
-  expenses(groupId: ID!): [Expense!]!
+  group(id: ID!): Group!
+
+  expenses: [Expense!]!
+  expensesByGroup(groupId: ID!): [Expense!]!
+  expensesByUser(userId: ID!): [Expense!]!
+  expense(groupId: ID!, userId: ID!): Expense!
+
+  roles: [Role!]!
+  role(id: ID!): Role!
+
+  groupUsers: [GroupUser!]!
+  groupUsersByGroup(groupId: ID!): [GroupUser!]!
+  groupUsersByUser(userId: ID!): [GroupUser!]!
+  groupUser(groupId: ID!, userId: ID!): GroupUser!
+}
+
+type Mutation {
+  addUser(user: UserInput!): User!
+  editUser(id: ID!, user: UserInput!): User!
+  deleteUser(id: ID!): User!
+
+  addGroup(group: GroupInput!): Group!
+  editGroup(id: ID!, group: GroupInput!): Group!
+  deleteGroup(id: ID!): Group!
+
+  addExpense(expense: ExpenseInput!): Expense!
+  editExpense(id: ID!, expense: ExpenseInput!): Expense!
+  deleteExpense(id: ID!): Expense!
+
+  addRole(role: RoleInput!): Role!
+  editRole(id: ID!, role: RoleInput!): Role!
+  deleteRole(id: ID!): Role!
+
+  addGroupUser(groupUser: GroupUserInput!): GroupUser!
+  editGroupUser(id: ID!, groupUser: GroupUserInput!): GroupUser!
+  deleteGroupUser(id: ID!): GroupUser!
 }

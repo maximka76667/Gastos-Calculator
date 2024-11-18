@@ -2,15 +2,28 @@
 
 package model
 
-type Expense struct {
-	ID           string  `json:"id"`
-	User         *User   `json:"user"`
-	Group        *Group  `json:"group"`
+type ExpenseInput struct {
+	UserID       string  `json:"userId"`
+	GroupID      string  `json:"groupId"`
 	Amount       float64 `json:"amount"`
 	IsMain       bool    `json:"isMain"`
 	Name         string  `json:"name"`
 	CurrencyCode string  `json:"currencyCode"`
 	LastModified string  `json:"lastModified"`
+}
+
+type GroupInput struct {
+	Name      string `json:"name"`
+	CreatedAt string `json:"created_at"`
+}
+
+type GroupUserInput struct {
+	UserID  string `json:"userId"`
+	GroupID string `json:"groupId"`
+	RoleID  string `json:"roleId"`
+}
+
+type Mutation struct {
 }
 
 type Query struct {
@@ -19,4 +32,16 @@ type Query struct {
 type Role struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
+}
+
+type RoleInput struct {
+	Name string `json:"name"`
+}
+
+type UserInput struct {
+	Email             string `json:"email"`
+	FullName          string `json:"fullName"`
+	Username          string `json:"username"`
+	Password          string `json:"password"`
+	PreferredCurrency string `json:"preferredCurrency"`
 }

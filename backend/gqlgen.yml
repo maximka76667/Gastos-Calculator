@@ -101,3 +101,5 @@ models:
     model: gastos-counter-api/graph/model.Group
   GroupUser:
     model: gastos-counter-api/graph/model.GroupUser
+  Expense:
+    model: gastos-counter-api/graph/model.Expense
