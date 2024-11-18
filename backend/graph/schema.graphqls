@@ -1,34 +1,44 @@
-scalar Date
+scalar Time
 
 type User {
   id: ID!
   email: String!
   fullName: String!
   username: String!
-  password: String!
   preferredCurrency: String!
   role(group_id: ID!): Role
   participatesIn: [Group!]!
 }
 
-input UserInput {
+input CreateUserInput {
   email: String!
   fullName: String!
   username: String!
   password: String!
-  preferredCurrency: String!
+  preferredCurrency: String = "EUR"
+}
+
+input EditUserInput {
+  email: String
+  fullName: String
+  username: String
+  password: String
+  preferredCurrency: String
 }
 
 type Group {
   id: ID!
   name: String!
-  created_at: Date!
+  created_at: Time
   members: [User!]!
 }
 
-input GroupInput {
+input CreateGroupInput {
   name: String!
-  created_at: Date!
+}
+
+input EditGroupInput {
+  name: String
 }
 
 type Expense {
@@ -39,17 +49,25 @@ type Expense {
   isMain: Boolean!
   name: String!
   currencyCode: String!
-  lastModified: Date!
+  lastModified: Time
 }
 
-input ExpenseInput {
+input CreateExpenseInput {
   userId: ID!
   groupId: ID!
   amount: Float!
   isMain: Boolean!
   name: String!
-  currencyCode: String!
-  lastModified: Date!
+  currencyCode: String = "EUR"
+}
+
+input EditExpenseInput {
+  userId: ID
+  groupId: ID
+  amount: Float
+  isMain: Boolean
+  name: String
+  currencyCode: String
 }
 
 type Role {
@@ -57,8 +75,12 @@ type Role {
   name: String!
 }
 
-input RoleInput {
+input CreateRoleInput {
   name: String!
+}
+
+input EditRoleInput {
+  name: String
 }
 
 type GroupUser {
@@ -67,10 +89,16 @@ type GroupUser {
   role: Role!
 }
 
-input GroupUserInput {
+input CreateGroupUserInput {
   userId: ID!
   groupId: ID!
   roleId: ID!
+}
+
+input EditGroupUserInput {
+  userId: ID
+  groupId: ID
+  roleId: ID
 }
 
 type Query {
@@ -95,23 +123,27 @@ type Query {
 }
 
 type Mutation {
-  addUser(user: UserInput!): User!
-  editUser(id: ID!, user: UserInput!): User!
+  addUser(user: CreateUserInput!): User!
+  editUser(id: ID!, user: EditUserInput!): User!
   deleteUser(id: ID!): User!
 
-  addGroup(group: GroupInput!): Group!
-  editGroup(id: ID!, group: GroupInput!): Group!
+  addGroup(group: CreateGroupInput!): Group!
+  editGroup(id: ID!, group: EditGroupInput!): Group!
   deleteGroup(id: ID!): Group!
 
-  addExpense(expense: ExpenseInput!): Expense!
-  editExpense(id: ID!, expense: ExpenseInput!): Expense!
+  addExpense(expense: CreateExpenseInput!): Expense!
+  editExpense(id: ID!, expense: EditExpenseInput!): Expense!
   deleteExpense(id: ID!): Expense!
 
-  addRole(role: RoleInput!): Role!
-  editRole(id: ID!, role: RoleInput!): Role!
+  addRole(role: CreateRoleInput!): Role!
+  editRole(id: ID!, role: EditRoleInput!): Role!
   deleteRole(id: ID!): Role!
 
-  addGroupUser(groupUser: GroupUserInput!): GroupUser!
-  editGroupUser(id: ID!, groupUser: GroupUserInput!): GroupUser!
-  deleteGroupUser(id: ID!): GroupUser!
+  addGroupUser(groupUser: CreateGroupUserInput!): GroupUser!
+  editGroupUser(
+    group_id: ID!
+    user_id: ID!
+    groupUser: EditGroupUserInput!
+  ): GroupUser!
+  deleteGroupUser(group_id: ID!, user_id: ID!): GroupUser!
 }

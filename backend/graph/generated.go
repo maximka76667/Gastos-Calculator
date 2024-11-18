@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
@@ -76,21 +77,21 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		AddExpense      func(childComplexity int, expense model.ExpenseInput) int
-		AddGroup        func(childComplexity int, group model.GroupInput) int
-		AddGroupUser    func(childComplexity int, groupUser model.GroupUserInput) int
-		AddRole         func(childComplexity int, role model.RoleInput) int
-		AddUser         func(childComplexity int, user model.UserInput) int
+		AddExpense      func(childComplexity int, expense model.CreateExpenseInput) int
+		AddGroup        func(childComplexity int, group model.CreateGroupInput) int
+		AddGroupUser    func(childComplexity int, groupUser model.CreateGroupUserInput) int
+		AddRole         func(childComplexity int, role model.CreateRoleInput) int
+		AddUser         func(childComplexity int, user model.CreateUserInput) int
 		DeleteExpense   func(childComplexity int, id string) int
 		DeleteGroup     func(childComplexity int, id string) int
-		DeleteGroupUser func(childComplexity int, id string) int
+		DeleteGroupUser func(childComplexity int, groupID string, userID string) int
 		DeleteRole      func(childComplexity int, id string) int
 		DeleteUser      func(childComplexity int, id string) int
-		EditExpense     func(childComplexity int, id string, expense model.ExpenseInput) int
-		EditGroup       func(childComplexity int, id string, group model.GroupInput) int
-		EditGroupUser   func(childComplexity int, id string, groupUser model.GroupUserInput) int
-		EditRole        func(childComplexity int, id string, role model.RoleInput) int
-		EditUser        func(childComplexity int, id string, user model.UserInput) int
+		EditExpense     func(childComplexity int, id string, expense model.EditExpenseInput) int
+		EditGroup       func(childComplexity int, id string, group model.EditGroupInput) int
+		EditGroupUser   func(childComplexity int, groupID string, userID string, groupUser model.EditGroupUserInput) int
+		EditRole        func(childComplexity int, id string, role model.EditRoleInput) int
+		EditUser        func(childComplexity int, id string, user model.EditUserInput) int
 	}
 
 	Query struct {
@@ -120,7 +121,6 @@ type ComplexityRoot struct {
 		FullName          func(childComplexity int) int
 		ID                func(childComplexity int) int
 		ParticipatesIn    func(childComplexity int) int
-		Password          func(childComplexity int) int
 		PreferredCurrency func(childComplexity int) int
 		Role              func(childComplexity int, groupID string) int
 		Username          func(childComplexity int) int
@@ -140,21 +140,21 @@ type GroupUserResolver interface {
 	Role(ctx context.Context, obj *model.GroupUser) (*model.Role, error)
 }
 type MutationResolver interface {
-	AddUser(ctx context.Context, user model.UserInput) (*model.User, error)
-	EditUser(ctx context.Context, id string, user model.UserInput) (*model.User, error)
+	AddUser(ctx context.Context, user model.CreateUserInput) (*model.User, error)
+	EditUser(ctx context.Context, id string, user model.EditUserInput) (*model.User, error)
 	DeleteUser(ctx context.Context, id string) (*model.User, error)
-	AddGroup(ctx context.Context, group model.GroupInput) (*model.Group, error)
-	EditGroup(ctx context.Context, id string, group model.GroupInput) (*model.Group, error)
+	AddGroup(ctx context.Context, group model.CreateGroupInput) (*model.Group, error)
+	EditGroup(ctx context.Context, id string, group model.EditGroupInput) (*model.Group, error)
 	DeleteGroup(ctx context.Context, id string) (*model.Group, error)
-	AddExpense(ctx context.Context, expense model.ExpenseInput) (*model.Expense, error)
-	EditExpense(ctx context.Context, id string, expense model.ExpenseInput) (*model.Expense, error)
+	AddExpense(ctx context.Context, expense model.CreateExpenseInput) (*model.Expense, error)
+	EditExpense(ctx context.Context, id string, expense model.EditExpenseInput) (*model.Expense, error)
 	DeleteExpense(ctx context.Context, id string) (*model.Expense, error)
-	AddRole(ctx context.Context, role model.RoleInput) (*model.Role, error)
-	EditRole(ctx context.Context, id string, role model.RoleInput) (*model.Role, error)
+	AddRole(ctx context.Context, role model.CreateRoleInput) (*model.Role, error)
+	EditRole(ctx context.Context, id string, role model.EditRoleInput) (*model.Role, error)
 	DeleteRole(ctx context.Context, id string) (*model.Role, error)
-	AddGroupUser(ctx context.Context, groupUser model.GroupUserInput) (*model.GroupUser, error)
-	EditGroupUser(ctx context.Context, id string, groupUser model.GroupUserInput) (*model.GroupUser, error)
-	DeleteGroupUser(ctx context.Context, id string) (*model.GroupUser, error)
+	AddGroupUser(ctx context.Context, groupUser model.CreateGroupUserInput) (*model.GroupUser, error)
+	EditGroupUser(ctx context.Context, groupID string, userID string, groupUser model.EditGroupUserInput) (*model.GroupUser, error)
+	DeleteGroupUser(ctx context.Context, groupID string, userID string) (*model.GroupUser, error)
 }
 type QueryResolver interface {
 	Users(ctx context.Context) ([]*model.User, error)
@@ -311,7 +311,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.AddExpense(childComplexity, args["expense"].(model.ExpenseInput)), true
+		return e.complexity.Mutation.AddExpense(childComplexity, args["expense"].(model.CreateExpenseInput)), true
 
 	case "Mutation.addGroup":
 		if e.complexity.Mutation.AddGroup == nil {
@@ -323,7 +323,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.AddGroup(childComplexity, args["group"].(model.GroupInput)), true
+		return e.complexity.Mutation.AddGroup(childComplexity, args["group"].(model.CreateGroupInput)), true
 
 	case "Mutation.addGroupUser":
 		if e.complexity.Mutation.AddGroupUser == nil {
@@ -335,7 +335,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.AddGroupUser(childComplexity, args["groupUser"].(model.GroupUserInput)), true
+		return e.complexity.Mutation.AddGroupUser(childComplexity, args["groupUser"].(model.CreateGroupUserInput)), true
 
 	case "Mutation.addRole":
 		if e.complexity.Mutation.AddRole == nil {
@@ -347,7 +347,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.AddRole(childComplexity, args["role"].(model.RoleInput)), true
+		return e.complexity.Mutation.AddRole(childComplexity, args["role"].(model.CreateRoleInput)), true
 
 	case "Mutation.addUser":
 		if e.complexity.Mutation.AddUser == nil {
@@ -359,7 +359,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.AddUser(childComplexity, args["user"].(model.UserInput)), true
+		return e.complexity.Mutation.AddUser(childComplexity, args["user"].(model.CreateUserInput)), true
 
 	case "Mutation.deleteExpense":
 		if e.complexity.Mutation.DeleteExpense == nil {
@@ -395,7 +395,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteGroupUser(childComplexity, args["id"].(string)), true
+		return e.complexity.Mutation.DeleteGroupUser(childComplexity, args["group_id"].(string), args["user_id"].(string)), true
 
 	case "Mutation.deleteRole":
 		if e.complexity.Mutation.DeleteRole == nil {
@@ -431,7 +431,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.EditExpense(childComplexity, args["id"].(string), args["expense"].(model.ExpenseInput)), true
+		return e.complexity.Mutation.EditExpense(childComplexity, args["id"].(string), args["expense"].(model.EditExpenseInput)), true
 
 	case "Mutation.editGroup":
 		if e.complexity.Mutation.EditGroup == nil {
@@ -443,7 +443,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.EditGroup(childComplexity, args["id"].(string), args["group"].(model.GroupInput)), true
+		return e.complexity.Mutation.EditGroup(childComplexity, args["id"].(string), args["group"].(model.EditGroupInput)), true
 
 	case "Mutation.editGroupUser":
 		if e.complexity.Mutation.EditGroupUser == nil {
@@ -455,7 +455,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.EditGroupUser(childComplexity, args["id"].(string), args["groupUser"].(model.GroupUserInput)), true
+		return e.complexity.Mutation.EditGroupUser(childComplexity, args["group_id"].(string), args["user_id"].(string), args["groupUser"].(model.EditGroupUserInput)), true
 
 	case "Mutation.editRole":
 		if e.complexity.Mutation.EditRole == nil {
@@ -467,7 +467,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.EditRole(childComplexity, args["id"].(string), args["role"].(model.RoleInput)), true
+		return e.complexity.Mutation.EditRole(childComplexity, args["id"].(string), args["role"].(model.EditRoleInput)), true
 
 	case "Mutation.editUser":
 		if e.complexity.Mutation.EditUser == nil {
@@ -479,7 +479,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.EditUser(childComplexity, args["id"].(string), args["user"].(model.UserInput)), true
+		return e.complexity.Mutation.EditUser(childComplexity, args["id"].(string), args["user"].(model.EditUserInput)), true
 
 	case "Query.expense":
 		if e.complexity.Query.Expense == nil {
@@ -666,13 +666,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.ParticipatesIn(childComplexity), true
 
-	case "User.password":
-		if e.complexity.User.Password == nil {
-			break
-		}
-
-		return e.complexity.User.Password(childComplexity), true
-
 	case "User.preferredCurrency":
 		if e.complexity.User.PreferredCurrency == nil {
 			break
@@ -707,11 +700,16 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
-		ec.unmarshalInputExpenseInput,
-		ec.unmarshalInputGroupInput,
-		ec.unmarshalInputGroupUserInput,
-		ec.unmarshalInputRoleInput,
-		ec.unmarshalInputUserInput,
+		ec.unmarshalInputCreateExpenseInput,
+		ec.unmarshalInputCreateGroupInput,
+		ec.unmarshalInputCreateGroupUserInput,
+		ec.unmarshalInputCreateRoleInput,
+		ec.unmarshalInputCreateUserInput,
+		ec.unmarshalInputEditExpenseInput,
+		ec.unmarshalInputEditGroupInput,
+		ec.unmarshalInputEditGroupUserInput,
+		ec.unmarshalInputEditRoleInput,
+		ec.unmarshalInputEditUserInput,
 	)
 	first := true
 
@@ -841,13 +839,13 @@ func (ec *executionContext) field_Mutation_addExpense_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_addExpense_argsExpense(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (model.ExpenseInput, error) {
+) (model.CreateExpenseInput, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("expense"))
 	if tmp, ok := rawArgs["expense"]; ok {
-		return ec.unmarshalNExpenseInput2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐExpenseInput(ctx, tmp)
+		return ec.unmarshalNCreateExpenseInput2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐCreateExpenseInput(ctx, tmp)
 	}
 
-	var zeroVal model.ExpenseInput
+	var zeroVal model.CreateExpenseInput
 	return zeroVal, nil
 }
 
@@ -864,13 +862,13 @@ func (ec *executionContext) field_Mutation_addGroupUser_args(ctx context.Context
 func (ec *executionContext) field_Mutation_addGroupUser_argsGroupUser(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (model.GroupUserInput, error) {
+) (model.CreateGroupUserInput, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("groupUser"))
 	if tmp, ok := rawArgs["groupUser"]; ok {
-		return ec.unmarshalNGroupUserInput2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐGroupUserInput(ctx, tmp)
+		return ec.unmarshalNCreateGroupUserInput2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐCreateGroupUserInput(ctx, tmp)
 	}
 
-	var zeroVal model.GroupUserInput
+	var zeroVal model.CreateGroupUserInput
 	return zeroVal, nil
 }
 
@@ -887,13 +885,13 @@ func (ec *executionContext) field_Mutation_addGroup_args(ctx context.Context, ra
 func (ec *executionContext) field_Mutation_addGroup_argsGroup(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (model.GroupInput, error) {
+) (model.CreateGroupInput, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("group"))
 	if tmp, ok := rawArgs["group"]; ok {
-		return ec.unmarshalNGroupInput2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐGroupInput(ctx, tmp)
+		return ec.unmarshalNCreateGroupInput2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐCreateGroupInput(ctx, tmp)
 	}
 
-	var zeroVal model.GroupInput
+	var zeroVal model.CreateGroupInput
 	return zeroVal, nil
 }
 
@@ -910,13 +908,13 @@ func (ec *executionContext) field_Mutation_addRole_args(ctx context.Context, raw
 func (ec *executionContext) field_Mutation_addRole_argsRole(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (model.RoleInput, error) {
+) (model.CreateRoleInput, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("role"))
 	if tmp, ok := rawArgs["role"]; ok {
-		return ec.unmarshalNRoleInput2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐRoleInput(ctx, tmp)
+		return ec.unmarshalNCreateRoleInput2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐCreateRoleInput(ctx, tmp)
 	}
 
-	var zeroVal model.RoleInput
+	var zeroVal model.CreateRoleInput
 	return zeroVal, nil
 }
 
@@ -933,13 +931,13 @@ func (ec *executionContext) field_Mutation_addUser_args(ctx context.Context, raw
 func (ec *executionContext) field_Mutation_addUser_argsUser(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (model.UserInput, error) {
+) (model.CreateUserInput, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("user"))
 	if tmp, ok := rawArgs["user"]; ok {
-		return ec.unmarshalNUserInput2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐUserInput(ctx, tmp)
+		return ec.unmarshalNCreateUserInput2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐCreateUserInput(ctx, tmp)
 	}
 
-	var zeroVal model.UserInput
+	var zeroVal model.CreateUserInput
 	return zeroVal, nil
 }
 
@@ -969,19 +967,37 @@ func (ec *executionContext) field_Mutation_deleteExpense_argsID(
 func (ec *executionContext) field_Mutation_deleteGroupUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Mutation_deleteGroupUser_argsID(ctx, rawArgs)
+	arg0, err := ec.field_Mutation_deleteGroupUser_argsGroupID(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["id"] = arg0
+	args["group_id"] = arg0
+	arg1, err := ec.field_Mutation_deleteGroupUser_argsUserID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["user_id"] = arg1
 	return args, nil
 }
-func (ec *executionContext) field_Mutation_deleteGroupUser_argsID(
+func (ec *executionContext) field_Mutation_deleteGroupUser_argsGroupID(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-	if tmp, ok := rawArgs["id"]; ok {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("group_id"))
+	if tmp, ok := rawArgs["group_id"]; ok {
+		return ec.unmarshalNID2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteGroupUser_argsUserID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("user_id"))
+	if tmp, ok := rawArgs["user_id"]; ok {
 		return ec.unmarshalNID2string(ctx, tmp)
 	}
 
@@ -1089,37 +1105,55 @@ func (ec *executionContext) field_Mutation_editExpense_argsID(
 func (ec *executionContext) field_Mutation_editExpense_argsExpense(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (model.ExpenseInput, error) {
+) (model.EditExpenseInput, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("expense"))
 	if tmp, ok := rawArgs["expense"]; ok {
-		return ec.unmarshalNExpenseInput2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐExpenseInput(ctx, tmp)
+		return ec.unmarshalNEditExpenseInput2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐEditExpenseInput(ctx, tmp)
 	}
 
-	var zeroVal model.ExpenseInput
+	var zeroVal model.EditExpenseInput
 	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_editGroupUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Mutation_editGroupUser_argsID(ctx, rawArgs)
+	arg0, err := ec.field_Mutation_editGroupUser_argsGroupID(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["id"] = arg0
-	arg1, err := ec.field_Mutation_editGroupUser_argsGroupUser(ctx, rawArgs)
+	args["group_id"] = arg0
+	arg1, err := ec.field_Mutation_editGroupUser_argsUserID(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["groupUser"] = arg1
+	args["user_id"] = arg1
+	arg2, err := ec.field_Mutation_editGroupUser_argsGroupUser(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["groupUser"] = arg2
 	return args, nil
 }
-func (ec *executionContext) field_Mutation_editGroupUser_argsID(
+func (ec *executionContext) field_Mutation_editGroupUser_argsGroupID(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-	if tmp, ok := rawArgs["id"]; ok {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("group_id"))
+	if tmp, ok := rawArgs["group_id"]; ok {
+		return ec.unmarshalNID2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_editGroupUser_argsUserID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("user_id"))
+	if tmp, ok := rawArgs["user_id"]; ok {
 		return ec.unmarshalNID2string(ctx, tmp)
 	}
 
@@ -1130,13 +1164,13 @@ func (ec *executionContext) field_Mutation_editGroupUser_argsID(
 func (ec *executionContext) field_Mutation_editGroupUser_argsGroupUser(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (model.GroupUserInput, error) {
+) (model.EditGroupUserInput, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("groupUser"))
 	if tmp, ok := rawArgs["groupUser"]; ok {
-		return ec.unmarshalNGroupUserInput2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐGroupUserInput(ctx, tmp)
+		return ec.unmarshalNEditGroupUserInput2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐEditGroupUserInput(ctx, tmp)
 	}
 
-	var zeroVal model.GroupUserInput
+	var zeroVal model.EditGroupUserInput
 	return zeroVal, nil
 }
 
@@ -1171,13 +1205,13 @@ func (ec *executionContext) field_Mutation_editGroup_argsID(
 func (ec *executionContext) field_Mutation_editGroup_argsGroup(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (model.GroupInput, error) {
+) (model.EditGroupInput, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("group"))
 	if tmp, ok := rawArgs["group"]; ok {
-		return ec.unmarshalNGroupInput2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐGroupInput(ctx, tmp)
+		return ec.unmarshalNEditGroupInput2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐEditGroupInput(ctx, tmp)
 	}
 
-	var zeroVal model.GroupInput
+	var zeroVal model.EditGroupInput
 	return zeroVal, nil
 }
 
@@ -1212,13 +1246,13 @@ func (ec *executionContext) field_Mutation_editRole_argsID(
 func (ec *executionContext) field_Mutation_editRole_argsRole(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (model.RoleInput, error) {
+) (model.EditRoleInput, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("role"))
 	if tmp, ok := rawArgs["role"]; ok {
-		return ec.unmarshalNRoleInput2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐRoleInput(ctx, tmp)
+		return ec.unmarshalNEditRoleInput2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐEditRoleInput(ctx, tmp)
 	}
 
-	var zeroVal model.RoleInput
+	var zeroVal model.EditRoleInput
 	return zeroVal, nil
 }
 
@@ -1253,13 +1287,13 @@ func (ec *executionContext) field_Mutation_editUser_argsID(
 func (ec *executionContext) field_Mutation_editUser_argsUser(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (model.UserInput, error) {
+) (model.EditUserInput, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("user"))
 	if tmp, ok := rawArgs["user"]; ok {
-		return ec.unmarshalNUserInput2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐUserInput(ctx, tmp)
+		return ec.unmarshalNEditUserInput2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐEditUserInput(ctx, tmp)
 	}
 
-	var zeroVal model.UserInput
+	var zeroVal model.EditUserInput
 	return zeroVal, nil
 }
 
@@ -1697,8 +1731,6 @@ func (ec *executionContext) fieldContext_Expense_user(_ context.Context, field g
 				return ec.fieldContext_User_fullName(ctx, field)
 			case "username":
 				return ec.fieldContext_User_username(ctx, field)
-			case "password":
-				return ec.fieldContext_User_password(ctx, field)
 			case "preferredCurrency":
 				return ec.fieldContext_User_preferredCurrency(ctx, field)
 			case "role":
@@ -1963,14 +1995,11 @@ func (ec *executionContext) _Expense_lastModified(ctx context.Context, field gra
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNDate2string(ctx, field.Selections, res)
+	return ec.marshalOTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Expense_lastModified(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1980,7 +2009,7 @@ func (ec *executionContext) fieldContext_Expense_lastModified(_ context.Context,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Date does not have child fields")
+			return nil, errors.New("field of type Time does not have child fields")
 		},
 	}
 	return fc, nil
@@ -2095,14 +2124,11 @@ func (ec *executionContext) _Group_created_at(ctx context.Context, field graphql
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNDate2string(ctx, field.Selections, res)
+	return ec.marshalOTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Group_created_at(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2112,7 +2138,7 @@ func (ec *executionContext) fieldContext_Group_created_at(_ context.Context, fie
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Date does not have child fields")
+			return nil, errors.New("field of type Time does not have child fields")
 		},
 	}
 	return fc, nil
@@ -2165,8 +2191,6 @@ func (ec *executionContext) fieldContext_Group_members(_ context.Context, field 
 				return ec.fieldContext_User_fullName(ctx, field)
 			case "username":
 				return ec.fieldContext_User_username(ctx, field)
-			case "password":
-				return ec.fieldContext_User_password(ctx, field)
 			case "preferredCurrency":
 				return ec.fieldContext_User_preferredCurrency(ctx, field)
 			case "role":
@@ -2227,8 +2251,6 @@ func (ec *executionContext) fieldContext_GroupUser_user(_ context.Context, field
 				return ec.fieldContext_User_fullName(ctx, field)
 			case "username":
 				return ec.fieldContext_User_username(ctx, field)
-			case "password":
-				return ec.fieldContext_User_password(ctx, field)
 			case "preferredCurrency":
 				return ec.fieldContext_User_preferredCurrency(ctx, field)
 			case "role":
@@ -2360,7 +2382,7 @@ func (ec *executionContext) _Mutation_addUser(ctx context.Context, field graphql
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().AddUser(rctx, fc.Args["user"].(model.UserInput))
+		return ec.resolvers.Mutation().AddUser(rctx, fc.Args["user"].(model.CreateUserInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2393,8 +2415,6 @@ func (ec *executionContext) fieldContext_Mutation_addUser(ctx context.Context, f
 				return ec.fieldContext_User_fullName(ctx, field)
 			case "username":
 				return ec.fieldContext_User_username(ctx, field)
-			case "password":
-				return ec.fieldContext_User_password(ctx, field)
 			case "preferredCurrency":
 				return ec.fieldContext_User_preferredCurrency(ctx, field)
 			case "role":
@@ -2433,7 +2453,7 @@ func (ec *executionContext) _Mutation_editUser(ctx context.Context, field graphq
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().EditUser(rctx, fc.Args["id"].(string), fc.Args["user"].(model.UserInput))
+		return ec.resolvers.Mutation().EditUser(rctx, fc.Args["id"].(string), fc.Args["user"].(model.EditUserInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2466,8 +2486,6 @@ func (ec *executionContext) fieldContext_Mutation_editUser(ctx context.Context, 
 				return ec.fieldContext_User_fullName(ctx, field)
 			case "username":
 				return ec.fieldContext_User_username(ctx, field)
-			case "password":
-				return ec.fieldContext_User_password(ctx, field)
 			case "preferredCurrency":
 				return ec.fieldContext_User_preferredCurrency(ctx, field)
 			case "role":
@@ -2539,8 +2557,6 @@ func (ec *executionContext) fieldContext_Mutation_deleteUser(ctx context.Context
 				return ec.fieldContext_User_fullName(ctx, field)
 			case "username":
 				return ec.fieldContext_User_username(ctx, field)
-			case "password":
-				return ec.fieldContext_User_password(ctx, field)
 			case "preferredCurrency":
 				return ec.fieldContext_User_preferredCurrency(ctx, field)
 			case "role":
@@ -2579,7 +2595,7 @@ func (ec *executionContext) _Mutation_addGroup(ctx context.Context, field graphq
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().AddGroup(rctx, fc.Args["group"].(model.GroupInput))
+		return ec.resolvers.Mutation().AddGroup(rctx, fc.Args["group"].(model.CreateGroupInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2644,7 +2660,7 @@ func (ec *executionContext) _Mutation_editGroup(ctx context.Context, field graph
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().EditGroup(rctx, fc.Args["id"].(string), fc.Args["group"].(model.GroupInput))
+		return ec.resolvers.Mutation().EditGroup(rctx, fc.Args["id"].(string), fc.Args["group"].(model.EditGroupInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2774,7 +2790,7 @@ func (ec *executionContext) _Mutation_addExpense(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().AddExpense(rctx, fc.Args["expense"].(model.ExpenseInput))
+		return ec.resolvers.Mutation().AddExpense(rctx, fc.Args["expense"].(model.CreateExpenseInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2847,7 +2863,7 @@ func (ec *executionContext) _Mutation_editExpense(ctx context.Context, field gra
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().EditExpense(rctx, fc.Args["id"].(string), fc.Args["expense"].(model.ExpenseInput))
+		return ec.resolvers.Mutation().EditExpense(rctx, fc.Args["id"].(string), fc.Args["expense"].(model.EditExpenseInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2993,7 +3009,7 @@ func (ec *executionContext) _Mutation_addRole(ctx context.Context, field graphql
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().AddRole(rctx, fc.Args["role"].(model.RoleInput))
+		return ec.resolvers.Mutation().AddRole(rctx, fc.Args["role"].(model.CreateRoleInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3054,7 +3070,7 @@ func (ec *executionContext) _Mutation_editRole(ctx context.Context, field graphq
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().EditRole(rctx, fc.Args["id"].(string), fc.Args["role"].(model.RoleInput))
+		return ec.resolvers.Mutation().EditRole(rctx, fc.Args["id"].(string), fc.Args["role"].(model.EditRoleInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3176,7 +3192,7 @@ func (ec *executionContext) _Mutation_addGroupUser(ctx context.Context, field gr
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().AddGroupUser(rctx, fc.Args["groupUser"].(model.GroupUserInput))
+		return ec.resolvers.Mutation().AddGroupUser(rctx, fc.Args["groupUser"].(model.CreateGroupUserInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3239,7 +3255,7 @@ func (ec *executionContext) _Mutation_editGroupUser(ctx context.Context, field g
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().EditGroupUser(rctx, fc.Args["id"].(string), fc.Args["groupUser"].(model.GroupUserInput))
+		return ec.resolvers.Mutation().EditGroupUser(rctx, fc.Args["group_id"].(string), fc.Args["user_id"].(string), fc.Args["groupUser"].(model.EditGroupUserInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3302,7 +3318,7 @@ func (ec *executionContext) _Mutation_deleteGroupUser(ctx context.Context, field
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteGroupUser(rctx, fc.Args["id"].(string))
+		return ec.resolvers.Mutation().DeleteGroupUser(rctx, fc.Args["group_id"].(string), fc.Args["user_id"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3398,8 +3414,6 @@ func (ec *executionContext) fieldContext_Query_users(_ context.Context, field gr
 				return ec.fieldContext_User_fullName(ctx, field)
 			case "username":
 				return ec.fieldContext_User_username(ctx, field)
-			case "password":
-				return ec.fieldContext_User_password(ctx, field)
 			case "preferredCurrency":
 				return ec.fieldContext_User_preferredCurrency(ctx, field)
 			case "role":
@@ -3460,8 +3474,6 @@ func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field g
 				return ec.fieldContext_User_fullName(ctx, field)
 			case "username":
 				return ec.fieldContext_User_username(ctx, field)
-			case "password":
-				return ec.fieldContext_User_password(ctx, field)
 			case "preferredCurrency":
 				return ec.fieldContext_User_preferredCurrency(ctx, field)
 			case "role":
@@ -4619,50 +4631,6 @@ func (ec *executionContext) _User_username(ctx context.Context, field graphql.Co
 }
 
 func (ec *executionContext) fieldContext_User_username(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "User",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _User_password(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_User_password(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Password, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_User_password(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "User",
 		Field:      field,
@@ -6604,14 +6572,18 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(_ context.Context
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputExpenseInput(ctx context.Context, obj interface{}) (model.ExpenseInput, error) {
-	var it model.ExpenseInput
+func (ec *executionContext) unmarshalInputCreateExpenseInput(ctx context.Context, obj interface{}) (model.CreateExpenseInput, error) {
+	var it model.CreateExpenseInput
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"userId", "groupId", "amount", "isMain", "name", "currencyCode", "lastModified"}
+	if _, present := asMap["currencyCode"]; !present {
+		asMap["currencyCode"] = "EUR"
+	}
+
+	fieldsInOrder := [...]string{"userId", "groupId", "amount", "isMain", "name", "currencyCode"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -6655,32 +6627,25 @@ func (ec *executionContext) unmarshalInputExpenseInput(ctx context.Context, obj 
 			it.Name = data
 		case "currencyCode":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("currencyCode"))
-			data, err := ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.CurrencyCode = data
-		case "lastModified":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("lastModified"))
-			data, err := ec.unmarshalNDate2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.LastModified = data
 		}
 	}
 
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputGroupInput(ctx context.Context, obj interface{}) (model.GroupInput, error) {
-	var it model.GroupInput
+func (ec *executionContext) unmarshalInputCreateGroupInput(ctx context.Context, obj interface{}) (model.CreateGroupInput, error) {
+	var it model.CreateGroupInput
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"name", "created_at"}
+	fieldsInOrder := [...]string{"name"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -6694,21 +6659,14 @@ func (ec *executionContext) unmarshalInputGroupInput(ctx context.Context, obj in
 				return it, err
 			}
 			it.Name = data
-		case "created_at":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("created_at"))
-			data, err := ec.unmarshalNDate2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.CreatedAt = data
 		}
 	}
 
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputGroupUserInput(ctx context.Context, obj interface{}) (model.GroupUserInput, error) {
-	var it model.GroupUserInput
+func (ec *executionContext) unmarshalInputCreateGroupUserInput(ctx context.Context, obj interface{}) (model.CreateGroupUserInput, error) {
+	var it model.CreateGroupUserInput
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
@@ -6748,8 +6706,8 @@ func (ec *executionContext) unmarshalInputGroupUserInput(ctx context.Context, ob
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputRoleInput(ctx context.Context, obj interface{}) (model.RoleInput, error) {
-	var it model.RoleInput
+func (ec *executionContext) unmarshalInputCreateRoleInput(ctx context.Context, obj interface{}) (model.CreateRoleInput, error) {
+	var it model.CreateRoleInput
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
@@ -6775,11 +6733,15 @@ func (ec *executionContext) unmarshalInputRoleInput(ctx context.Context, obj int
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputUserInput(ctx context.Context, obj interface{}) (model.UserInput, error) {
-	var it model.UserInput
+func (ec *executionContext) unmarshalInputCreateUserInput(ctx context.Context, obj interface{}) (model.CreateUserInput, error) {
+	var it model.CreateUserInput
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
+	}
+
+	if _, present := asMap["preferredCurrency"]; !present {
+		asMap["preferredCurrency"] = "EUR"
 	}
 
 	fieldsInOrder := [...]string{"email", "fullName", "username", "password", "preferredCurrency"}
@@ -6819,7 +6781,219 @@ func (ec *executionContext) unmarshalInputUserInput(ctx context.Context, obj int
 			it.Password = data
 		case "preferredCurrency":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("preferredCurrency"))
-			data, err := ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PreferredCurrency = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputEditExpenseInput(ctx context.Context, obj interface{}) (model.EditExpenseInput, error) {
+	var it model.EditExpenseInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"userId", "groupId", "amount", "isMain", "name", "currencyCode"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "userId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.UserID = data
+		case "groupId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("groupId"))
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.GroupID = data
+		case "amount":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("amount"))
+			data, err := ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Amount = data
+		case "isMain":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isMain"))
+			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IsMain = data
+		case "name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
+		case "currencyCode":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("currencyCode"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.CurrencyCode = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputEditGroupInput(ctx context.Context, obj interface{}) (model.EditGroupInput, error) {
+	var it model.EditGroupInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"name"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputEditGroupUserInput(ctx context.Context, obj interface{}) (model.EditGroupUserInput, error) {
+	var it model.EditGroupUserInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"userId", "groupId", "roleId"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "userId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.UserID = data
+		case "groupId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("groupId"))
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.GroupID = data
+		case "roleId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("roleId"))
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.RoleID = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputEditRoleInput(ctx context.Context, obj interface{}) (model.EditRoleInput, error) {
+	var it model.EditRoleInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"name"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputEditUserInput(ctx context.Context, obj interface{}) (model.EditUserInput, error) {
+	var it model.EditUserInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"email", "fullName", "username", "password", "preferredCurrency"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "email":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Email = data
+		case "fullName":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fullName"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FullName = data
+		case "username":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Username = data
+		case "password":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Password = data
+		case "preferredCurrency":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("preferredCurrency"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6948,9 +7122,6 @@ func (ec *executionContext) _Expense(ctx context.Context, sel ast.SelectionSet, 
 			}
 		case "lastModified":
 			out.Values[i] = ec._Expense_lastModified(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -6997,9 +7168,6 @@ func (ec *executionContext) _Group(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "created_at":
 			out.Values[i] = ec._Group_created_at(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
 		case "members":
 			field := field
 
@@ -7781,11 +7949,6 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
-		case "password":
-			out.Values[i] = ec._User_password(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
 		case "preferredCurrency":
 			out.Values[i] = ec._User_preferredCurrency(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -8224,19 +8387,54 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) unmarshalNDate2string(ctx context.Context, v interface{}) (string, error) {
-	res, err := graphql.UnmarshalString(v)
+func (ec *executionContext) unmarshalNCreateExpenseInput2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐCreateExpenseInput(ctx context.Context, v interface{}) (model.CreateExpenseInput, error) {
+	res, err := ec.unmarshalInputCreateExpenseInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNDate2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
-	res := graphql.MarshalString(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-	}
-	return res
+func (ec *executionContext) unmarshalNCreateGroupInput2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐCreateGroupInput(ctx context.Context, v interface{}) (model.CreateGroupInput, error) {
+	res, err := ec.unmarshalInputCreateGroupInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNCreateGroupUserInput2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐCreateGroupUserInput(ctx context.Context, v interface{}) (model.CreateGroupUserInput, error) {
+	res, err := ec.unmarshalInputCreateGroupUserInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNCreateRoleInput2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐCreateRoleInput(ctx context.Context, v interface{}) (model.CreateRoleInput, error) {
+	res, err := ec.unmarshalInputCreateRoleInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNCreateUserInput2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐCreateUserInput(ctx context.Context, v interface{}) (model.CreateUserInput, error) {
+	res, err := ec.unmarshalInputCreateUserInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNEditExpenseInput2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐEditExpenseInput(ctx context.Context, v interface{}) (model.EditExpenseInput, error) {
+	res, err := ec.unmarshalInputEditExpenseInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNEditGroupInput2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐEditGroupInput(ctx context.Context, v interface{}) (model.EditGroupInput, error) {
+	res, err := ec.unmarshalInputEditGroupInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNEditGroupUserInput2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐEditGroupUserInput(ctx context.Context, v interface{}) (model.EditGroupUserInput, error) {
+	res, err := ec.unmarshalInputEditGroupUserInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNEditRoleInput2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐEditRoleInput(ctx context.Context, v interface{}) (model.EditRoleInput, error) {
+	res, err := ec.unmarshalInputEditRoleInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNEditUserInput2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐEditUserInput(ctx context.Context, v interface{}) (model.EditUserInput, error) {
+	res, err := ec.unmarshalInputEditUserInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNExpense2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐExpense(ctx context.Context, sel ast.SelectionSet, v model.Expense) graphql.Marshaler {
@@ -8295,11 +8493,6 @@ func (ec *executionContext) marshalNExpense2ᚖgastosᚑcounterᚑapiᚋgraphᚋ
 		return graphql.Null
 	}
 	return ec._Expense(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNExpenseInput2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐExpenseInput(ctx context.Context, v interface{}) (model.ExpenseInput, error) {
-	res, err := ec.unmarshalInputExpenseInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v interface{}) (float64, error) {
@@ -8375,11 +8568,6 @@ func (ec *executionContext) marshalNGroup2ᚖgastosᚑcounterᚑapiᚋgraphᚋmo
 	return ec._Group(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNGroupInput2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐGroupInput(ctx context.Context, v interface{}) (model.GroupInput, error) {
-	res, err := ec.unmarshalInputGroupInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
 func (ec *executionContext) marshalNGroupUser2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐGroupUser(ctx context.Context, sel ast.SelectionSet, v model.GroupUser) graphql.Marshaler {
 	return ec._GroupUser(ctx, sel, &v)
 }
@@ -8436,11 +8624,6 @@ func (ec *executionContext) marshalNGroupUser2ᚖgastosᚑcounterᚑapiᚋgraph�
 		return graphql.Null
 	}
 	return ec._GroupUser(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNGroupUserInput2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐGroupUserInput(ctx context.Context, v interface{}) (model.GroupUserInput, error) {
-	res, err := ec.unmarshalInputGroupUserInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
@@ -8516,11 +8699,6 @@ func (ec *executionContext) marshalNRole2ᚖgastosᚑcounterᚑapiᚋgraphᚋmod
 	return ec._Role(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNRoleInput2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐRoleInput(ctx context.Context, v interface{}) (model.RoleInput, error) {
-	res, err := ec.unmarshalInputRoleInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -8592,11 +8770,6 @@ func (ec *executionContext) marshalNUser2ᚖgastosᚑcounterᚑapiᚋgraphᚋmod
 		return graphql.Null
 	}
 	return ec._User(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNUserInput2gastosᚑcounterᚑapiᚋgraphᚋmodelᚐUserInput(ctx context.Context, v interface{}) (model.UserInput, error) {
-	res, err := ec.unmarshalInputUserInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
@@ -8878,6 +9051,38 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
+func (ec *executionContext) unmarshalOFloat2ᚖfloat64(ctx context.Context, v interface{}) (*float64, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalFloatContext(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOFloat2ᚖfloat64(ctx context.Context, sel ast.SelectionSet, v *float64) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	res := graphql.MarshalFloatContext(*v)
+	return graphql.WrapContextMarshaler(ctx, res)
+}
+
+func (ec *executionContext) unmarshalOID2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalID(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOID2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	res := graphql.MarshalID(*v)
+	return res
+}
+
 func (ec *executionContext) marshalORole2ᚖgastosᚑcounterᚑapiᚋgraphᚋmodelᚐRole(ctx context.Context, sel ast.SelectionSet, v *model.Role) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -8898,6 +9103,16 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 		return graphql.Null
 	}
 	res := graphql.MarshalString(*v)
+	return res
+}
+
+func (ec *executionContext) unmarshalOTime2timeᚐTime(ctx context.Context, v interface{}) (time.Time, error) {
+	res, err := graphql.UnmarshalTime(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOTime2timeᚐTime(ctx context.Context, sel ast.SelectionSet, v time.Time) graphql.Marshaler {
+	res := graphql.MarshalTime(v)
 	return res
 }
 

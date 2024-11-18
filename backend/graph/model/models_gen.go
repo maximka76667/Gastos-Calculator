@@ -2,46 +2,70 @@
 
 package model
 
-type ExpenseInput struct {
+type CreateExpenseInput struct {
 	UserID       string  `json:"userId"`
 	GroupID      string  `json:"groupId"`
 	Amount       float64 `json:"amount"`
 	IsMain       bool    `json:"isMain"`
 	Name         string  `json:"name"`
-	CurrencyCode string  `json:"currencyCode"`
-	LastModified string  `json:"lastModified"`
+	CurrencyCode *string `json:"currencyCode,omitempty"`
 }
 
-type GroupInput struct {
-	Name      string `json:"name"`
-	CreatedAt string `json:"created_at"`
+type CreateGroupInput struct {
+	Name string `json:"name"`
 }
 
-type GroupUserInput struct {
+type CreateGroupUserInput struct {
 	UserID  string `json:"userId"`
 	GroupID string `json:"groupId"`
 	RoleID  string `json:"roleId"`
+}
+
+type CreateRoleInput struct {
+	Name string `json:"name"`
+}
+
+type CreateUserInput struct {
+	Email             string  `json:"email"`
+	FullName          string  `json:"fullName"`
+	Username          string  `json:"username"`
+	Password          string  `json:"password"`
+	PreferredCurrency *string `json:"preferredCurrency,omitempty"`
+}
+
+type EditExpenseInput struct {
+	UserID       *string  `json:"userId,omitempty"`
+	GroupID      *string  `json:"groupId,omitempty"`
+	Amount       *float64 `json:"amount,omitempty"`
+	IsMain       *bool    `json:"isMain,omitempty"`
+	Name         *string  `json:"name,omitempty"`
+	CurrencyCode *string  `json:"currencyCode,omitempty"`
+}
+
+type EditGroupInput struct {
+	Name *string `json:"name,omitempty"`
+}
+
+type EditGroupUserInput struct {
+	UserID  *string `json:"userId,omitempty"`
+	GroupID *string `json:"groupId,omitempty"`
+	RoleID  *string `json:"roleId,omitempty"`
+}
+
+type EditRoleInput struct {
+	Name *string `json:"name,omitempty"`
+}
+
+type EditUserInput struct {
+	Email             *string `json:"email,omitempty"`
+	FullName          *string `json:"fullName,omitempty"`
+	Username          *string `json:"username,omitempty"`
+	Password          *string `json:"password,omitempty"`
+	PreferredCurrency *string `json:"preferredCurrency,omitempty"`
 }
 
 type Mutation struct {
 }
 
 type Query struct {
-}
-
-type Role struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-}
-
-type RoleInput struct {
-	Name string `json:"name"`
-}
-
-type UserInput struct {
-	Email             string `json:"email"`
-	FullName          string `json:"fullName"`
-	Username          string `json:"username"`
-	Password          string `json:"password"`
-	PreferredCurrency string `json:"preferredCurrency"`
 }

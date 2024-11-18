@@ -103,3 +103,5 @@ models:
     model: gastos-counter-api/graph/model.GroupUser
   Expense:
     model: gastos-counter-api/graph/model.Expense
+  Role:
+    model: gastos-counter-api/graph/model.Role

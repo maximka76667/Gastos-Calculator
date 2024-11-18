@@ -18,6 +18,14 @@ func GetExpenses(db *gorm.DB) ([]*model.Expense, error) {
 	return expenses, nil
 }
 
+func GetExpenseById(db *gorm.DB, id string) (*model.Expense, error) {
+	var expense model.Expense
+	if err := db.First(&expense, "id = ?", id).Error; err != nil {
+		return nil, fmt.Errorf("could not find expense with ID %s: %w", id, err)
+	}
+	return &expense, nil
+}
+
 func GetExpense(db *gorm.DB, groupId string, userId string) (*model.Expense, error) {
 	var expense model.Expense
 

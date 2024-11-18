@@ -13,7 +13,7 @@ require (
 require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
-	golang.org/x/crypto v0.28.0 // indirect
+	golang.org/x/crypto v0.29.0
 )
 
 require (
@@ -28,6 +28,6 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/sosodev/duration v1.3.1 // indirect
 	golang.org/x/net v0.30.0 // indirect
-	golang.org/x/sync v0.8.0 // indirect
-	golang.org/x/text v0.19.0 // indirect
+	golang.org/x/sync v0.9.0 // indirect
+	golang.org/x/text v0.20.0 // indirect
 )
