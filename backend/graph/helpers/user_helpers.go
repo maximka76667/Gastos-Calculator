@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"fmt"
+	"gastos-counter-api/graph/loaders"
 	"gastos-counter-api/graph/model"
 	"gastos-counter-api/utils"
 
@@ -16,6 +17,8 @@ func GetUsers(db *gorm.DB) ([]*model.User, error) {
 		return nil, fmt.Errorf("failed to fetch users: %w", err)
 	}
 
+	fmt.Println("Users fetched from database: ", users)
+
 	return users, nil
 }
 
@@ -28,17 +31,11 @@ func GetUserByID(db *gorm.DB, userID string) (*model.User, error) {
 	return &user, nil
 }
 
-func GetUsersByGroupId(db *gorm.DB, groupId string) ([]*model.User, error) {
-	// Fetch groups from the `group_users` table for the given user ID
-	var users []*model.User
-
-	err := db.Model(&users).
-		Joins("JOIN group_users ON users.id = group_users.user_id").
-		Where("group_users.group_id = ?", groupId).
-		Find(&users).Error
+func GetUsersByGroupId(db *gorm.DB, loader *loaders.UserLoader, groupId string) ([]*model.User, error) {
+	users, err := loader.Load(groupId)
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to load members: %w", err)
 	}
 
 	return users, nil

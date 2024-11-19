@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gastos-counter-api/database"
 	"gastos-counter-api/graph"
+	"gastos-counter-api/middlewares"
 	"log"
 	"net/http"
 	"os"
@@ -30,10 +31,12 @@ func main() {
 
 	db := database.Connect()
 
-	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{DB: db}}))
+	config := graph.Config{Resolvers: &graph.Resolver{DB: db}}
+
+	srv := handler.NewDefaultServer(graph.NewExecutableSchema(config))
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", srv)
+	http.Handle("/query", middlewares.UserLoaderMiddleware(db, srv))
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))

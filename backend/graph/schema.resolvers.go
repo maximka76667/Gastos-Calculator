@@ -6,7 +6,9 @@ package graph
 
 import (
 	"context"
+	"fmt"
 	"gastos-counter-api/graph/helpers"
+	"gastos-counter-api/graph/loaders"
 	"gastos-counter-api/graph/model"
 )
 
@@ -22,7 +24,8 @@ func (r *expenseResolver) Group(ctx context.Context, obj *model.Expense) (*model
 
 // Members is the resolver for the members field.
 func (r *groupResolver) Members(ctx context.Context, obj *model.Group) ([]*model.User, error) {
-	return helpers.GetUsersByGroupId(r.DB, obj.ID)
+	loader := loaders.GetUserLoader(ctx)
+	return helpers.GetUsersByGroupId(r.DB, loader, obj.ID)
 }
 
 // User is the resolver for the user field.
@@ -192,6 +195,7 @@ func (r *userResolver) Role(ctx context.Context, obj *model.User, groupID string
 
 // ParticipatesIn is the resolver for the participatesIn field.
 func (r *userResolver) ParticipatesIn(ctx context.Context, obj *model.User) ([]*model.Group, error) {
+	fmt.Println("Groups fetched from database")
 	return helpers.GetGroupsByUserId(r.DB, obj.ID)
 }
 
