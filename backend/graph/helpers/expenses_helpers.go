@@ -8,6 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// Query helpers -- START
 func GetExpenses(db *gorm.DB) ([]*model.Expense, error) {
 	var expenses []*model.Expense
 
@@ -58,3 +59,60 @@ func GetExpensesByUserId(db *gorm.DB, userId string) ([]*model.Expense, error) {
 
 	return expenses, nil
 }
+
+// Query helpers -- END
+
+// Mutation helpers -- START
+func AddExpense(db *gorm.DB, expense model.CreateExpenseInput) (*model.Expense, error) {
+	newExpense := model.Expense{
+		UserId:       expense.UserID,
+		GroupId:      expense.GroupID,
+		IsMain:       expense.IsMain,
+		Name:         expense.Name,
+		CurrencyCode: *expense.CurrencyCode,
+		Amount:       expense.Amount,
+	}
+
+	return AddModel(db, newExpense)
+}
+
+func EditExpense(db *gorm.DB, id string, expense model.EditExpenseInput) (*model.Expense, error) {
+	// Fetch the existing expense by id
+	expenseToUpdate, err := GetExpenseById(db, id)
+	if err != nil {
+		return nil, fmt.Errorf("expense not found: %w", err)
+	}
+
+	// Update fields if provided
+	if expense.UserID != nil {
+		expenseToUpdate.UserId = *expense.UserID
+	}
+	if expense.GroupID != nil {
+		expenseToUpdate.GroupId = *expense.GroupID
+	}
+	if expense.Amount != nil {
+		expenseToUpdate.Amount = *expense.Amount
+	}
+	if expense.IsMain != nil {
+		expenseToUpdate.IsMain = *expense.IsMain
+	}
+	if expense.Name != nil {
+		expenseToUpdate.Name = *expense.Name
+	}
+	if expense.CurrencyCode != nil {
+		expenseToUpdate.CurrencyCode = *expense.CurrencyCode
+	}
+
+	return SaveModel(db, expenseToUpdate)
+}
+
+func DeleteExpense(db *gorm.DB, id string) (*model.Expense, error) {
+	expenseToDelete, err := GetExpenseById(db, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return DeleteModel(db, expenseToDelete)
+}
+
+// Mutation helpers -- END

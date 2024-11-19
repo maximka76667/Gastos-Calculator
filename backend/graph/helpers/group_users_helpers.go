@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// Query helpers -- START
 func GetGroupUsers(db *gorm.DB) ([]*model.GroupUser, error) {
 	var groupUsers []*model.GroupUser
 
@@ -47,3 +48,50 @@ func GetGroupUser(db *gorm.DB, groupId, userId string) (*model.GroupUser, error)
 	}
 	return &groupUser, nil
 }
+
+// Query helpers -- END
+
+// Mutation helpers -- START
+
+func AddGroupUser(db *gorm.DB, groupUser model.CreateGroupUserInput) (*model.GroupUser, error) {
+	newGroupUser := model.GroupUser{
+		GroupId: groupUser.GroupID,
+		UserId:  groupUser.UserID,
+		RoleId:  groupUser.RoleID,
+	}
+
+	return AddModel(db, newGroupUser)
+}
+
+func EditGroupUser(db *gorm.DB, groupID string, userID string, groupUser model.EditGroupUserInput) (*model.GroupUser, error) {
+
+	groupUserToUpdate, err := GetGroupUser(db, groupID, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Update the fields of the group-user relationship
+	if groupUser.GroupID != nil {
+		groupUserToUpdate.GroupId = *groupUser.GroupID
+	}
+	if groupUser.UserID != nil {
+		groupUserToUpdate.UserId = *groupUser.UserID
+	}
+	if groupUser.RoleID != nil {
+		groupUserToUpdate.RoleId = *groupUser.RoleID
+	}
+
+	return SaveModel(db, groupUserToUpdate)
+}
+
+func DeleteGroupUser(db *gorm.DB, groupID string, userID string) (*model.GroupUser, error) {
+	groupUserToDelete, err := GetGroupUser(db, groupID, userID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return DeleteModel(db, groupUserToDelete)
+}
+
+// Mutation helpers -- END

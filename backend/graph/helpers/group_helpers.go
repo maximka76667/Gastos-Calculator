@@ -7,6 +7,8 @@ import (
 	"gorm.io/gorm"
 )
 
+// Query helpers -- START
+
 func GetGroups(db *gorm.DB) ([]*model.Group, error) {
 	var groups []*model.Group
 
@@ -41,3 +43,40 @@ func GetGroupsByUserId(db *gorm.DB, userId string) ([]*model.Group, error) {
 
 	return groups, nil
 }
+
+// Query helpers -- END
+
+// Mutation helpers -- START
+
+func AddGroup(db *gorm.DB, group model.CreateGroupInput) (*model.Group, error) {
+	newGroup := model.Group{
+		Name: group.Name,
+	}
+
+	return AddModel(db, newGroup)
+}
+
+func EditGroup(db *gorm.DB, id string, group model.EditGroupInput) (*model.Group, error) {
+	groupToUpdate, err := GetGroupById(db, id)
+	if err != nil {
+		return nil, err
+	}
+
+	// Update the fields of the group
+	if group.Name != nil {
+		groupToUpdate.Name = *group.Name
+	}
+
+	return SaveModel(db, groupToUpdate)
+}
+
+func DeleteGroup(db *gorm.DB, id string) (*model.Group, error) {
+	groupToDelete, err := GetGroupById(db, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return DeleteModel(db, groupToDelete)
+}
+
+// Mutation helpers -- END

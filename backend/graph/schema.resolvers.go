@@ -6,10 +6,8 @@ package graph
 
 import (
 	"context"
-	"fmt"
+	"gastos-counter-api/graph/helpers"
 	"gastos-counter-api/graph/model"
-	"gastos-counter-api/helpers"
-	"gastos-counter-api/utils"
 )
 
 // User is the resolver for the user field.
@@ -44,306 +42,77 @@ func (r *groupUserResolver) Role(ctx context.Context, obj *model.GroupUser) (*mo
 
 // AddUser is the resolver for the addUser field.
 func (r *mutationResolver) AddUser(ctx context.Context, user model.CreateUserInput) (*model.User, error) {
-	hashedPassword, err := utils.HashPassword(user.Password)
-
-	if err != nil {
-		return nil, err
-	}
-
-	newUser := model.User{
-		Email:             user.Email,
-		FullName:          user.FullName,
-		Username:          user.Username,
-		PreferredCurrency: *user.PreferredCurrency,
-		Password:          hashedPassword,
-	}
-
-	if err = r.DB.Create(&newUser).Error; err != nil {
-		return nil, err
-	}
-
-	return &newUser, nil
+	return helpers.AddUser(r.DB, user)
 }
 
 // EditUser is the resolver for the editUser field.
 func (r *mutationResolver) EditUser(ctx context.Context, id string, user model.EditUserInput) (*model.User, error) {
-	userToUpdate, err := helpers.GetUserByID(r.DB, id)
-
-	if err != nil {
-		return nil, err
-	}
-
-	// Update the fields of the user
-	if user.Email != nil {
-		userToUpdate.Email = *user.Email
-	}
-	if user.FullName != nil {
-		userToUpdate.FullName = *user.FullName
-	}
-	if user.Username != nil {
-		userToUpdate.Username = *user.Username
-	}
-	if user.PreferredCurrency != nil {
-		userToUpdate.PreferredCurrency = *user.PreferredCurrency
-	}
-
-	if user.Password != nil {
-		hashedPassword, err := utils.HashPassword(*user.Password)
-		if err != nil {
-			return nil, fmt.Errorf("failed to hash password: %w", err)
-		}
-		userToUpdate.Password = hashedPassword
-	}
-
-	// Save the updated user
-	if err := r.DB.Save(&userToUpdate).Error; err != nil {
-		return nil, fmt.Errorf("failed to update user: %w", err)
-	}
-
-	return userToUpdate, nil
+	return helpers.EditUser(r.DB, id, user)
 }
 
 // DeleteUser is the resolver for the deleteUser field.
 func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (*model.User, error) {
-	userToDelete, err := helpers.GetUserByID(r.DB, id)
-
-	if err != nil {
-		return nil, err
-	}
-
-	if err := r.DB.Delete(&userToDelete).Error; err != nil {
-		return nil, fmt.Errorf("failed to delete user: %w", err)
-	}
-
-	// Return the deleted user data, or just return nil if you don't need it
-	return userToDelete, nil
+	return helpers.DeleteUser(r.DB, id)
 }
 
 // AddGroup is the resolver for the addGroup field.
 func (r *mutationResolver) AddGroup(ctx context.Context, group model.CreateGroupInput) (*model.Group, error) {
-	newGroup := model.Group{
-		Name: group.Name,
-	}
-
-	// Save the new group to the database
-	if err := r.DB.Create(&newGroup).Error; err != nil {
-		return nil, fmt.Errorf("failed to create group: %w", err)
-	}
-
-	return &newGroup, nil
+	return helpers.AddGroup(r.DB, group)
 }
 
 // EditGroup is the resolver for the editGroup field.
 func (r *mutationResolver) EditGroup(ctx context.Context, id string, group model.EditGroupInput) (*model.Group, error) {
-	groupToUpdate, err := helpers.GetGroupById(r.DB, id)
-	if err != nil {
-		return nil, err
-	}
-
-	// Update the fields of the group
-	if group.Name != nil {
-		groupToUpdate.Name = *group.Name
-	}
-
-	// Save the updated group
-	if err := r.DB.Save(&groupToUpdate).Error; err != nil {
-		return nil, fmt.Errorf("failed to update group: %w", err)
-	}
-
-	return groupToUpdate, nil
+	return helpers.EditGroup(r.DB, id, group)
 }
 
 // DeleteGroup is the resolver for the deleteGroup field.
 func (r *mutationResolver) DeleteGroup(ctx context.Context, id string) (*model.Group, error) {
-	groupToDelete, err := helpers.GetGroupById(r.DB, id)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := r.DB.Delete(&groupToDelete).Error; err != nil {
-		return nil, fmt.Errorf("failed to delete group: %w", err)
-	}
-
-	// Return the deleted group data, or just return nil if you don't need it
-	return groupToDelete, nil
+	return helpers.DeleteGroup(r.DB, id)
 }
 
 // AddExpense is the resolver for the addExpense field.
 func (r *mutationResolver) AddExpense(ctx context.Context, expense model.CreateExpenseInput) (*model.Expense, error) {
-	newExpense := model.Expense{
-		UserId:       expense.UserID,
-		GroupId:      expense.GroupID,
-		IsMain:       expense.IsMain,
-		Name:         expense.Name,
-		CurrencyCode: *expense.CurrencyCode,
-		Amount:       expense.Amount,
-	}
-
-	// Save the new expense to the database
-	if err := r.DB.Create(&newExpense).Error; err != nil {
-		return nil, fmt.Errorf("failed to create expense: %w", err)
-	}
-
-	return &newExpense, nil
+	return helpers.AddExpense(r.DB, expense)
 }
 
 // EditExpense is the resolver for the editExpense field.
 func (r *mutationResolver) EditExpense(ctx context.Context, id string, expense model.EditExpenseInput) (*model.Expense, error) {
-	// Fetch the existing expense by id
-	expenseToUpdate, err := helpers.GetExpenseById(r.DB, id)
-	if err != nil {
-		return nil, fmt.Errorf("expense not found: %w", err)
-	}
-
-	// Update fields if provided
-	if expense.UserID != nil {
-		expenseToUpdate.UserId = *expense.UserID
-	}
-	if expense.GroupID != nil {
-		expenseToUpdate.GroupId = *expense.GroupID
-	}
-	if expense.Amount != nil {
-		expenseToUpdate.Amount = *expense.Amount
-	}
-	if expense.IsMain != nil {
-		expenseToUpdate.IsMain = *expense.IsMain
-	}
-	if expense.Name != nil {
-		expenseToUpdate.Name = *expense.Name
-	}
-	if expense.CurrencyCode != nil {
-		expenseToUpdate.CurrencyCode = *expense.CurrencyCode
-	}
-
-	// Save the updated expense to the database
-	if err := r.DB.Save(&expenseToUpdate).Error; err != nil {
-		return nil, fmt.Errorf("failed to update expense: %w", err)
-	}
-
-	// Return the updated expense
-	return expenseToUpdate, nil
+	return helpers.EditExpense(r.DB, id, expense)
 }
 
 // DeleteExpense is the resolver for the deleteExpense field.
 func (r *mutationResolver) DeleteExpense(ctx context.Context, id string) (*model.Expense, error) {
-	expenseToDelete, err := helpers.GetExpenseById(r.DB, id)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := r.DB.Delete(&expenseToDelete).Error; err != nil {
-		return nil, fmt.Errorf("failed to delete expense: %w", err)
-	}
-
-	// Return the deleted expense data, or just return nil if you don't need it
-	return expenseToDelete, nil
+	return helpers.DeleteExpense(r.DB, id)
 }
 
 // AddRole is the resolver for the addRole field.
 func (r *mutationResolver) AddRole(ctx context.Context, role model.CreateRoleInput) (*model.Role, error) {
-	newRole := model.Role{
-		Name: role.Name,
-	}
-
-	// Save the new role to the database
-	if err := r.DB.Create(&newRole).Error; err != nil {
-		return nil, fmt.Errorf("failed to create role: %w", err)
-	}
-
-	return &newRole, nil
+	return helpers.AddRole(r.DB, role)
 }
 
 // EditRole is the resolver for the editRole field.
 func (r *mutationResolver) EditRole(ctx context.Context, id string, role model.EditRoleInput) (*model.Role, error) {
-	roleToUpdate, err := helpers.GetRoleById(r.DB, id)
-	if err != nil {
-		return nil, err
-	}
-
-	// Update the fields of the role
-	if role.Name != nil {
-		roleToUpdate.Name = *role.Name
-	}
-
-	// Save the updated role
-	if err := r.DB.Save(&roleToUpdate).Error; err != nil {
-		return nil, fmt.Errorf("failed to update role: %w", err)
-	}
-
-	return roleToUpdate, nil
+	return helpers.EditRole(r.DB, id, role)
 }
 
 // DeleteRole is the resolver for the deleteRole field.
 func (r *mutationResolver) DeleteRole(ctx context.Context, id string) (*model.Role, error) {
-	roleToDelete, err := helpers.GetRoleById(r.DB, id)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := r.DB.Delete(&roleToDelete).Error; err != nil {
-		return nil, fmt.Errorf("failed to delete role: %w", err)
-	}
-
-	// Return the deleted role data, or just return nil if you don't need it
-	return roleToDelete, nil
+	return helpers.DeleteRole(r.DB, id)
 }
 
 // AddGroupUser is the resolver for the addGroupUser field.
 func (r *mutationResolver) AddGroupUser(ctx context.Context, groupUser model.CreateGroupUserInput) (*model.GroupUser, error) {
-	newGroupUser := model.GroupUser{
-		GroupId: groupUser.GroupID,
-		UserId:  groupUser.UserID,
-		RoleId:  groupUser.RoleID,
-	}
-
-	// Save the new group-user relationship to the database
-	if err := r.DB.Create(&newGroupUser).Error; err != nil {
-		return nil, fmt.Errorf("failed to create group user: %w", err)
-	}
-
-	return &newGroupUser, nil
+	return helpers.AddGroupUser(r.DB, groupUser)
 }
 
 // EditGroupUser is the resolver for the editGroupUser field.
 func (r *mutationResolver) EditGroupUser(ctx context.Context, groupID string, userID string, groupUser model.EditGroupUserInput) (*model.GroupUser, error) {
-	groupUserToUpdate, err := helpers.GetGroupUser(r.DB, groupID, userID)
-	if err != nil {
-		return nil, err
-	}
-
-	// Update the fields of the group-user relationship
-	if groupUser.GroupID != nil {
-		groupUserToUpdate.GroupId = *groupUser.GroupID
-	}
-	if groupUser.UserID != nil {
-		groupUserToUpdate.UserId = *groupUser.UserID
-	}
-	if groupUser.RoleID != nil {
-		groupUserToUpdate.RoleId = *groupUser.RoleID
-	}
-
-	// Save the updated group-user relationship
-	if err := r.DB.Save(&groupUserToUpdate).Error; err != nil {
-		return nil, fmt.Errorf("failed to update group user: %w", err)
-	}
-
-	return groupUserToUpdate, nil
+	return helpers.EditGroupUser(r.DB, groupID, userID, groupUser)
 }
 
 // DeleteGroupUser is the resolver for the deleteGroupUser field.
 func (r *mutationResolver) DeleteGroupUser(ctx context.Context, groupID string, userID string) (*model.GroupUser, error) {
-	groupUserToDelete, err := helpers.GetGroupUser(r.DB, groupID, userID)
-
-	if err != nil {
-		return nil, err
-	}
-
-	if err := r.DB.Delete(&groupUserToDelete).Error; err != nil {
-		return nil, fmt.Errorf("failed to delete group user: %w", err)
-	}
-
-	// Return the deleted group-user relationship, or just return nil if you don't need it
-	return groupUserToDelete, nil
+	return helpers.DeleteGroupUser(r.DB, groupID, userID)
 }
 
 // Users is the resolver for the users field.

@@ -8,6 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// Query helpers -- START
 func GetRoles(db *gorm.DB) ([]*model.Role, error) {
 	var roles []*model.Role
 
@@ -47,3 +48,39 @@ func GetRoleById(db *gorm.DB, id string) (*model.Role, error) {
 
 	return &role, nil
 }
+
+// Query helpers -- END
+
+// Mutation helpers -- START
+func AddRole(db *gorm.DB, role model.CreateRoleInput) (*model.Role, error) {
+	newRole := model.Role{
+		Name: role.Name,
+	}
+
+	return AddModel(db, newRole)
+}
+
+func EditRole(db *gorm.DB, id string, role model.EditRoleInput) (*model.Role, error) {
+	roleToUpdate, err := GetRoleById(db, id)
+	if err != nil {
+		return nil, err
+	}
+
+	// Update the fields of the role
+	if role.Name != nil {
+		roleToUpdate.Name = *role.Name
+	}
+
+	return SaveModel(db, roleToUpdate)
+}
+
+func DeleteRole(db *gorm.DB, id string) (*model.Role, error) {
+	roleToDelete, err := GetRoleById(db, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return DeleteModel(db, roleToDelete)
+}
+
+// Mutation helpers -- END
